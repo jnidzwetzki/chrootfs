@@ -1,4 +1,4 @@
 chrootfs
 ========
 
-chrootfs is a virtual fileystem for chroot environments
+chrootfs is a virtual filesystem for chroot environments

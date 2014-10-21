@@ -4,15 +4,21 @@ DIR = /tmp/chrootfs
 
 CFLAGS += $(shell pkg-config fuse --cflags --libs)
 CFLAGS += -Wall
+CFLAGS += -MD -MP
+
+OBJS := chrootfs.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: chrootfs.o
+all: $(OBJS)
 	$(CC) $(CFLAGS) chrootfs.o -o chrootfs
+
+-include $(SRC:%.c=%.d)
 
 clean:
 	rm *.o
+	rm *.d
 	rm chrootfs
 
 mount:

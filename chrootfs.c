@@ -87,11 +87,25 @@ static int chrootfs_read(const char *path, char *buf, size_t size, off_t offset,
 	return res;
 }
 
+static int chrootfs_readlink(const char *path, char *buf, size_t size)
+{
+	int res;
+
+	res = readlink(path, buf, size - 1);
+
+	if(res == -1)
+		return -errno;
+
+	buf[res] = '\0';
+	return 0;
+}
+
 static struct fuse_operations chrootfs_oper = {
-	.getattr = chrootfs_getattr,
-	.readdir = chrootfs_readdir,
-	.open    = chrootfs_open,
-	.read    = chrootfs_read,
+	.getattr  = chrootfs_getattr,
+	.readdir  = chrootfs_readdir,
+	.open     = chrootfs_open,
+	.read     = chrootfs_read,
+	.readlink = chrootfs_readlink,
 };
 
 int main(int argc, char *argv[])

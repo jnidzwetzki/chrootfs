@@ -17,9 +17,7 @@ without copying any libraries or binaries.
 #include <errno.h>
 #include <fcntl.h>
 #include <dirent.h>
-
-static const char *chrootfs_str = "Hello World!\n";
-static const char *chrootfs_path = "/hello";
+#include <unistd.h>
 
 static int chrootfs_getattr(const char *path, struct stat *stbuf)
 {
@@ -59,32 +57,34 @@ static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 static int chrootfs_open(const char *path, struct fuse_file_info *fi)
 {
-	if (strcmp(path, chrootfs_path) != 0)
-		return -ENOENT;
+	int res;
 
-	if ((fi->flags & 3) != O_RDONLY)
-		return -EACCES;
+	res = open(path, fi->flags);
+	if(res == -1)
+		return -errno;
 
+	close(res);
 	return 0;
 }
 
 static int chrootfs_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi)
 {
-	size_t len;
+	int fd;
+	int res;
+
 	(void) fi;
-	if(strcmp(path, chrootfs_path) != 0)
-		return -ENOENT;
 
-	len = strlen(chrootfs_str);
-	if (offset < len) {
-		if (offset + size > len)
-			size = len - offset;
-		memcpy(buf, chrootfs_str + offset, size);
-	} else
-		size = 0;
+	fd = open(path, O_RDONLY);
+	if(fd == -1)
+		return -errno;
 
-	return size;
+	res = pread(fd, buf, size, offset);
+	if(res == -1)
+		return -errno;
+
+	close(fd);
+	return res;
 }
 
 static struct fuse_operations chrootfs_oper = {

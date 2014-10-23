@@ -6,13 +6,13 @@ CFLAGS += $(shell pkg-config fuse --cflags --libs)
 CFLAGS += -Wall
 CFLAGS += -MD -MP
 
-OBJS := chrootfs.o
+OBJS := tree.o chrootfs.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 all: $(OBJS)
-	$(CC) $(CFLAGS) chrootfs.o -o chrootfs
+	$(CC) $(CFLAGS) $(OBJS) -o chrootfs
 
 -include $(SRC:%.c=%.d)
 

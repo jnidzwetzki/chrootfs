@@ -19,6 +19,8 @@ without copying any libraries or binaries.
 #include <dirent.h>
 #include <unistd.h>
 
+#include "tree.h"
+
 static int chrootfs_getattr(const char *path, struct stat *stbuf)
 {
 	int res;

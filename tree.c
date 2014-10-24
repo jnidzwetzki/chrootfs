@@ -39,7 +39,7 @@ node* get_new_tree_node(char* name, void* ptr)
 	
 	memset(result, 0, sizeof(node));
 
-	result->name = (char*) malloc(sizeof(name));
+	result->name = (char*) malloc((strlen(name) + 1) * sizeof(char));
 	if(result->name == NULL)
 		goto oom;
 
@@ -100,7 +100,20 @@ node* get_tree_child(node* parent, char* name)
 
 bool allocate_new_tree_slots(node* parent, size_t slots)
 {
-	//TODO: Implement
+	node** newptr;
+	size_t old_size = parent->allocated_slots;
+	size_t new_size = old_size + slots;
+
+	newptr = (node**) realloc(parent->childs, new_size * sizeof(node*));
+
+	if(newptr == NULL)
+		return false;
+
+	memset(newptr + old_size, 0, slots * sizeof(node*));
+
+	parent->childs = newptr;
+	parent->allocated_slots =+ new_size;
+
 	return true;
 }
 
@@ -108,10 +121,17 @@ bool append_tree_child(node* parent, node* new_child)
 {
 	size_t i;
 	char* child_name;
+	bool result;
 	bool inserted = false;
 
-	if(parent->used_slots == parent->allocated_slots)
-		allocate_new_tree_slots(parent, ALLOCATE_SLOTS);
+	if(parent->used_slots == parent->allocated_slots) {
+		result = allocate_new_tree_slots(parent, ALLOCATE_SLOTS);
+
+		if(result == false) {
+			errno = -ENOMEM;
+			return false;
+		}
+	}
 
 	for(i = 0; i < parent->used_slots; i++) {
 		child_name = (*(parent->childs + i))->name;

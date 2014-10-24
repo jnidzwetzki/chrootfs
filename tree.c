@@ -117,6 +117,38 @@ bool allocate_new_tree_slots(node* parent, size_t slots)
 	return true;
 }
 
+void print_tree(node* tree, char *parent) 
+{
+	size_t i;
+	char buffer[1024];
+	
+	memset(buffer, 0, sizeof(buffer));
+	strncpy(buffer, parent, sizeof(buffer));
+
+	// Append '/' if necessary
+	if(strlen(parent) != 0 && strlen(parent) != 1) 
+		strncat(buffer, "/", sizeof(buffer) - strlen(buffer) - 1);
+	
+	strncat(buffer, tree->name, sizeof(buffer) - strlen(buffer) - 1);
+	
+	printf("%s\n", buffer);
+
+	for(i = 0; i < tree->used_slots; i++) {
+		print_tree(*(tree->childs + i), buffer); 
+	}
+}
+
+void shift_tree_childs(node* child, size_t start) 
+{
+	size_t i;
+	node* tmp;
+
+	for(i = child->used_slots; i <= start; i--) {
+		tmp = *(child->childs + i);
+		*(child->childs + i + 1) = tmp;
+	}
+}
+
 bool append_tree_child(node* parent, node* new_child)
 {
 	size_t i;
@@ -137,6 +169,7 @@ bool append_tree_child(node* parent, node* new_child)
 		child_name = (*(parent->childs + i))->name;
 
 		if(strcmp(child_name, new_child->name) < 1) {
+			shift_tree_childs(parent, i);
 			*(parent->childs + parent->used_slots) = new_child;
 			inserted = true;
 			break;

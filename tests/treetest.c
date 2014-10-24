@@ -24,11 +24,26 @@ void fill_tree()
 	delete_tree(tree);
 }
 
+void fill_tree_slotoverflow() 
+{
+	node* tree = create_tree();
+	insert_tree_element(tree, "/var/www/web0", NULL);
+	insert_tree_element(tree, "/var/www/web1", NULL);
+	insert_tree_element(tree, "/var/www/web2", NULL);
+	insert_tree_element(tree, "/var/www/web3", NULL);
+	insert_tree_element(tree, "/var/www/web4", NULL);
+	insert_tree_element(tree, "/var/www/web5", NULL);
+	insert_tree_element(tree, "/var/www/web6", NULL);
+	delete_tree(tree);
+}
+
+
 int main(int argc, char* argv[])
 {
 	
 	create_empty_tree();
 	fill_tree();
+	fill_tree_slotoverflow();
 
 	return 0;
 }

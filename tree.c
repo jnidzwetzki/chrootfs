@@ -143,9 +143,9 @@ void shift_tree_childs(node* child, size_t start)
 	size_t i;
 	node* tmp;
 
-	for(i = child->used_slots; i <= start; i--) {
-		tmp = *(child->childs + i);
-		*(child->childs + i + 1) = tmp;
+	for(i = child->used_slots; i > start; i--) {
+		tmp = *(child->childs + i - 1);
+		*(child->childs + i) = tmp;
 	}
 }
 
@@ -168,9 +168,9 @@ bool append_tree_child(node* parent, node* new_child)
 	for(i = 0; i < parent->used_slots; i++) {
 		child_name = (*(parent->childs + i))->name;
 
-		if(strcmp(child_name, new_child->name) < 1) {
+		if(strcmp(child_name, new_child->name) == 1) {
 			shift_tree_childs(parent, i);
-			*(parent->childs + parent->used_slots) = new_child;
+			*(parent->childs + i) = new_child;
 			inserted = true;
 			break;
 		}

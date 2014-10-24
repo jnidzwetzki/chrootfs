@@ -102,12 +102,29 @@ static int chrootfs_readlink(const char *path, char *buf, size_t size)
 	return 0;
 }
 
+void *chrootfs_init(struct fuse_conn_info *conn)
+{
+	node* tree = create_tree();
+	insert_tree_element(tree, "/etc/hostname", hideFile);
+	return (void*) tree;
+}
+
+void chrootfs_destroy(void *ptr)
+{
+	if(ptr != NULL) {
+		node* tree = (node*) ptr;
+		delete_tree(tree);
+	}
+}
+
 static struct fuse_operations chrootfs_oper = {
 	.getattr  = chrootfs_getattr,
 	.readdir  = chrootfs_readdir,
 	.open     = chrootfs_open,
 	.read     = chrootfs_read,
 	.readlink = chrootfs_readlink,
+	.init     = chrootfs_init,
+	.destroy  = chrootfs_destroy,
 };
 
 int main(int argc, char *argv[])

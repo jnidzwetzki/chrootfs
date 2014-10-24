@@ -225,3 +225,28 @@ bool insert_tree_element(node* tree, char* name, void *ptr)
 
 	return true;
 }
+
+node* find_tree_element(node* tree, char* name)
+{
+	char *strptr;
+	char buffer[1024];
+	node* treeptr;
+
+	treeptr = tree;
+
+	// Copy name because strtok modifies it
+	strncpy(buffer, name, sizeof(buffer));
+	strptr = strtok(buffer, "/");
+
+	while(strptr != NULL) {
+		printf("Sarching for %s\n", strptr);
+		treeptr = get_tree_child(treeptr, strptr);
+
+		if(treeptr == NULL)
+			return NULL;
+
+		strptr = strtok(NULL, "/");
+	}
+
+	return treeptr;
+}

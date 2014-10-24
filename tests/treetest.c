@@ -53,7 +53,30 @@ void fill_tree_slotoverflow_unsorted()
 	delete_tree(tree);
 }
 
+void find_tree() 
+{
+	node* result;
+	node* tree = create_tree();
+	insert_tree_element(tree, "/var/www/web5", NULL);
+	insert_tree_element(tree, "/var/www/web3", NULL);
+	insert_tree_element(tree, "/var/www/web1", NULL);
+	insert_tree_element(tree, "/var/www/web2", NULL);
+	insert_tree_element(tree, "/var/www/web4", NULL);
+	insert_tree_element(tree, "/var/www/web0", NULL);
+	insert_tree_element(tree, "/var/www/web6", NULL);
+	
+	result = find_tree_element(tree, "/dfdsfddd");
+	if(result != NULL)
+		printf("Expected NULL in Line __LINE__\n");
 
+	result = find_tree_element(tree, "/var/www/web4");
+	if(result == NULL)
+		printf("Expected not NULL in Line __LINE__\n");
+
+	printf("Test tree find ok\n");
+
+	delete_tree(tree);
+}
 
 int main(int argc, char* argv[])
 {
@@ -62,6 +85,7 @@ int main(int argc, char* argv[])
 	fill_tree();
 	fill_tree_slotoverflow();
 	fill_tree_slotoverflow_unsorted();
+	find_tree();
 
 	return 0;
 }

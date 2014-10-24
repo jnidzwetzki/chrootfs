@@ -17,6 +17,7 @@ node* create_tree();
 void delete_tree(node* tree);
 bool insert_tree_element(node* tree, char* name, void *ptr);
 void print_tree(node* tree, char *parent);
+node* find_tree_element(node* tree, char* name);
 
 // Prototypes - Private
 node* get_new_tree_node(char* name, void* ptr);

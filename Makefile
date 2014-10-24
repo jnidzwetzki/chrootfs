@@ -1,10 +1,8 @@
+include Makefile.inc
+
 .PHONY: all clean mount umount
 
 DIR = /tmp/chrootfs
-
-CFLAGS += $(shell pkg-config fuse --cflags --libs)
-CFLAGS += -Wall
-CFLAGS += -MD -MP
 
 OBJS := tree.o chrootfs.o
 

@@ -21,6 +21,7 @@ void fill_tree()
 	insert_tree_element(tree, "/etc/hostname", NULL);
 	insert_tree_element(tree, "/var/www/", NULL);
 	insert_tree_element(tree, "/var/wwww/web0", NULL);
+	print_tree(tree, "");
 	delete_tree(tree);
 }
 
@@ -34,8 +35,24 @@ void fill_tree_slotoverflow()
 	insert_tree_element(tree, "/var/www/web4", NULL);
 	insert_tree_element(tree, "/var/www/web5", NULL);
 	insert_tree_element(tree, "/var/www/web6", NULL);
+	print_tree(tree, "");
 	delete_tree(tree);
 }
+
+void fill_tree_slotoverflow_unsorted() 
+{
+	node* tree = create_tree();
+	insert_tree_element(tree, "/var/www/web5", NULL);
+	insert_tree_element(tree, "/var/www/web3", NULL);
+	insert_tree_element(tree, "/var/www/web1", NULL);
+	insert_tree_element(tree, "/var/www/web2", NULL);
+	insert_tree_element(tree, "/var/www/web4", NULL);
+	insert_tree_element(tree, "/var/www/web0", NULL);
+	insert_tree_element(tree, "/var/www/web6", NULL);
+	print_tree(tree, "");
+	delete_tree(tree);
+}
+
 
 
 int main(int argc, char* argv[])
@@ -44,6 +61,7 @@ int main(int argc, char* argv[])
 	create_empty_tree();
 	fill_tree();
 	fill_tree_slotoverflow();
+	fill_tree_slotoverflow_unsorted();
 
 	return 0;
 }

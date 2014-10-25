@@ -2,11 +2,7 @@
 #define __CHROOTFS_TRRE_H_
 
 #include <stdbool.h>
-
-// Function pointers
-typedef bool (*fsfilter)(const char* name, void* ptr);
-
-bool hideFile(const char* name, void* ptr);
+#include "filter.h"
 
 // Structs
 typedef struct node {

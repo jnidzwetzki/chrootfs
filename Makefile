@@ -4,7 +4,7 @@ include Makefile.inc
 
 DIR = /tmp/chrootfs
 
-OBJS := tree.o chrootfs.o
+OBJS := filter.o tree.o chrootfs.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

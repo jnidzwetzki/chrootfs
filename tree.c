@@ -9,11 +9,6 @@
 
 #define ALLOCATE_SLOTS 5
 
-bool hideFile(const char* name, void* ptr)
-{
-	return false;
-}
-
 node* create_tree()
 {
 	char* root = "/";

@@ -149,7 +149,7 @@ static int chrootfs_readlink(const char *path, char *buf, size_t size)
 void *chrootfs_init(struct fuse_conn_info *conn)
 {
 	node* tree = create_tree();
-	insert_tree_element(tree, "/etc/hostname", hideFile);
+	insert_tree_element(tree, "/etc/hostname", hide_file);
 	return (void*) tree;
 }
 

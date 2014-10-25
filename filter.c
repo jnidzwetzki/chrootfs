@@ -13,11 +13,10 @@ bool hide_file(const char* name, uid_t uid, gid_t gid)
 
 bool show_only_user(const char* name, uid_t uid, gid_t gid)
 {
-
-	if(strncmp(name, ".", 1) == 0)
+	if(strncmp(name, ".", sizeof(name)) == 0)
 		return true;
 
-	if(strncmp(name, "..", 2) == 0)
+	if(strncmp(name, "..", sizeof(name)) == 0)
 		return true;
 
 	// Get Data from /etc/passwd

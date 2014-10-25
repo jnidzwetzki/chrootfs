@@ -21,13 +21,43 @@ without copying any libraries or binaries.
 
 #include "tree.h"
 
+bool apply_filter(node* tree, const char *name)
+{
+
+	if(tree != NULL) {
+		// Apply filter
+		node *element = find_tree_element(tree, name);
+		printf("Get filter for %s\n", name);
+
+		// Filter found
+		if(element != NULL) {
+			fsfilter filter = element -> ptr;
+
+			if(filter != NULL)
+				return filter(name, NULL);
+		}
+	}
+
+	return true;
+}
+
 static int chrootfs_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
- 	res = lstat(path, stbuf);
- 	if (res == -1)
+
+	// Fetch configuration
+	node *tree = (node*)fuse_get_context()->private_data;
+
+	if(! apply_filter(tree, path)) {
+		return -ENOENT;
+	}
+
+	res = lstat(path, stbuf);
+
+	if (res == -1)
  		return -errno;
- 	return 0;
+
+	return 0;
 }
 
 static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
@@ -45,9 +75,18 @@ static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	if(directory == NULL) 
 		return -errno;
 
+	// Fetch configuration
+	node *tree = (node*)fuse_get_context()->private_data;
+
+	// Get subtree
+	tree = find_tree_element(tree, path);
+
 	// Read directory
 	while ((entry = readdir(directory)) != NULL) {
-		// TODO: Apply filter
+
+		if(! apply_filter(tree, entry->d_name))
+			continue;
+
 		memset(&state, 0, sizeof(state));
 		state.st_ino = entry->d_ino;
 		state.st_mode = entry->d_type;

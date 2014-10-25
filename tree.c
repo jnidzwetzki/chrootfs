@@ -9,7 +9,7 @@
 
 #define ALLOCATE_SLOTS 5
 
-bool hideFile(char* name, void* ptr)
+bool hideFile(const char* name, void* ptr)
 {
 	return false;
 }
@@ -220,7 +220,7 @@ bool insert_tree_element(node* tree, char* name, void *ptr)
 			printf("Element found\n");
 		} else {
 			printf("Element is Empty\n");
-			childptr = get_new_tree_node(strptr, ptr);
+			childptr = get_new_tree_node(strptr, NULL);
 			append_tree_child(treeptr, childptr);
 		}
 
@@ -228,10 +228,12 @@ bool insert_tree_element(node* tree, char* name, void *ptr)
 		strptr = strtok(NULL, "/");
 	}
 
+	treeptr->ptr = ptr;
+
 	return true;
 }
 
-node* find_tree_element(node* tree, char* name)
+node* find_tree_element(node* tree, const char* name)
 {
 	char *strptr;
 	char buffer[1024];

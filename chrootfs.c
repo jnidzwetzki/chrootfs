@@ -18,10 +18,11 @@ without copying any libraries or binaries.
 #include <fcntl.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 #include "tree.h"
 
-bool apply_filter(node* tree, const char *name)
+bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 {
 
 	if(tree != NULL) {
@@ -34,7 +35,7 @@ bool apply_filter(node* tree, const char *name)
 			fsfilter filter = element -> ptr;
 
 			if(filter != NULL)
-				return filter(name, NULL);
+				return filter(name, uid, gid);
 		}
 	}
 
@@ -47,8 +48,10 @@ static int chrootfs_getattr(const char *path, struct stat *stbuf)
 
 	// Fetch configuration
 	node *tree = (node*)fuse_get_context()->private_data;
+	uid_t uid = fuse_get_context()->uid;
+	gid_t gid = fuse_get_context()->gid;
 
-	if(! apply_filter(tree, path)) {
+	if(! apply_filter(tree, path, uid, gid)) {
 		return -ENOENT;
 	}
 
@@ -77,6 +80,8 @@ static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 	// Fetch configuration
 	node *tree = (node*)fuse_get_context()->private_data;
+	uid_t uid = fuse_get_context()->uid;
+	gid_t gid = fuse_get_context()->gid;
 
 	// Get subtree
 	tree = find_tree_element(tree, path);
@@ -84,7 +89,7 @@ static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	// Read directory
 	while ((entry = readdir(directory)) != NULL) {
 
-		if(! apply_filter(tree, entry->d_name))
+		if(! apply_filter(tree, entry->d_name, uid, gid))
 			continue;
 
 		memset(&state, 0, sizeof(state));

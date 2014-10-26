@@ -6,13 +6,24 @@
 
 #include "tree.h"
 
-bool hide_file(const char* name, uid_t uid, gid_t gid)
+bool hide_file(const char* name, const char* nodename, uid_t uid, gid_t gid)
 {
 	return false;
 }
 
-bool show_only_user(const char* name, uid_t uid, gid_t gid)
+bool show_only_user(const char* name, const char* nodename, uid_t uid, gid_t gid)
 {
+
+	printf("Filtering %s on node %s\n", name, nodename);
+
+	// FIXME: Compare full node name
+	char buffer[1024];
+	strncpy(buffer, "/", sizeof("/"));
+	strncat(buffer, nodename, sizeof(buffer) - strlen(buffer) - 1);
+
+	if(strncmp(buffer, name, sizeof(buffer)) == 0)
+		return true;
+
 	if(strncmp(name, ".", sizeof(name)) == 0)
 		return true;
 

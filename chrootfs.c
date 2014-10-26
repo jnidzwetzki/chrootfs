@@ -25,18 +25,19 @@ without copying any libraries or binaries.
 bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 {
 
-	if(tree != NULL) {
-		// Apply filter
-		node *element = find_tree_element(tree, name);
-		printf("Get filter for %s\n", name);
+	if(tree == NULL) 
+		return true;
 
-		// Filter found
-		if(element != NULL) {
-			fsfilter filter = element -> ptr;
+	node* element = find_tree_element(tree, name);
+		printf("Got filter for %s\n", name);
+	}
 
-			if(filter != NULL)
-				return filter(name, uid, gid);
-		}
+	// Filter found
+	if(element != NULL) {
+		fsfilter filter = element -> ptr;
+
+		if(filter != NULL)
+			return filter(name, element -> name, uid, gid);
 	}
 
 	return true;
@@ -89,6 +90,7 @@ static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	// Read directory
 	while ((entry = readdir(directory)) != NULL) {
 
+		// Filter for entries
 		if(! apply_filter(tree, entry->d_name, uid, gid))
 			continue;
 
@@ -150,6 +152,7 @@ void *chrootfs_init(struct fuse_conn_info *conn)
 {
 	node* tree = create_tree();
 	insert_tree_element(tree, "/etc/hostname", hide_file);
+	insert_tree_element(tree, "/home", show_only_user);
 	return (void*) tree;
 }
 

@@ -135,7 +135,7 @@ void print_tree(node* tree, char *parent)
 	
 	strncat(buffer, tree->name, sizeof(buffer) - strlen(buffer) - 1);
 	
-	printf("%s - Filter %02x\n", buffer, tree->ptr);
+	printf("%s - Filter %02x\n", buffer, (int) tree->ptr);
 
 	for(i = 0; i < tree->used_slots; i++) {
 		print_tree(*(tree->childs + i), buffer); 
@@ -257,3 +257,29 @@ node* find_tree_element(node* tree, const char* name)
 
 	return treeptr;
 }
+
+void get_full_name_for_node(node* mynode, char* result)
+{
+	char* name;
+	size_t i;
+
+	node* parent = mynode;
+	memset(result, 0, sizeof(result));
+
+	while(parent->parent != parent) {
+		name = parent->name;
+
+		if(name[0] == '/')
+			continue;
+
+		memmove(result + strlen(name) + 1, result, strlen(result) + 2);
+		
+		for(i = 0; i < strlen(name); i++) {
+			result[i + 1] = name[i];
+		}
+
+		result[0] = '/';
+		parent = parent->parent;
+	}
+}
+

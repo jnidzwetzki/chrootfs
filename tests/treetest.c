@@ -78,6 +78,25 @@ void find_tree()
 	delete_tree(tree);
 }
 
+void get_name() 
+{
+	node* result;
+	char buffer[1024];
+
+	node* tree = create_tree();
+	insert_tree_element(tree, "/etc", NULL);
+	insert_tree_element(tree, "/var/www/web5", NULL);
+	
+	result = find_tree_element(tree, "/var/www/web5");
+	
+	get_full_name_for_node(result, buffer);
+
+	printf("Name of node is %s\n", buffer);
+
+	delete_tree(tree);
+}
+
+
 int main(int argc, char* argv[])
 {
 	
@@ -86,6 +105,7 @@ int main(int argc, char* argv[])
 	fill_tree_slotoverflow();
 	fill_tree_slotoverflow_unsorted();
 	find_tree();
+	get_name();
 
 	return 0;
 }

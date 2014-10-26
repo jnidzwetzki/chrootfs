@@ -20,6 +20,7 @@ void delete_tree(node* tree);
 bool insert_tree_element(node* tree, char* name, void *ptr);
 void print_tree(node* tree, char *parent);
 node* find_tree_element(node* tree, const char* name);
+void get_full_name_for_node(node* mynode, char* result);
 
 // Prototypes - Private
 node* get_new_tree_node(char* name, void* ptr);

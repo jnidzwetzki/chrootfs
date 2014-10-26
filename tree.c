@@ -12,7 +12,10 @@
 node* create_tree()
 {
 	char* root = "/";
-	return get_new_tree_node(root, NULL);
+	node* tree = get_new_tree_node(root, NULL);
+	tree->parent = tree;
+
+	return tree;
 }
 
 void delete_tree(node* tree)
@@ -49,6 +52,7 @@ node* get_new_tree_node(char* name, void* ptr)
 	result->used_slots = 0;
 	result->allocated_slots = ALLOCATE_SLOTS;
 	result->childs = (node**) malloc(ALLOCATE_SLOTS * sizeof(node*));
+	result->parent = NULL;
 
 	// Out of memory
 	if(result->childs == NULL)
@@ -131,7 +135,7 @@ void print_tree(node* tree, char *parent)
 	
 	strncat(buffer, tree->name, sizeof(buffer) - strlen(buffer) - 1);
 	
-	printf("%s\n", buffer);
+	printf("%s - Filter %02x\n", buffer, tree->ptr);
 
 	for(i = 0; i < tree->used_slots; i++) {
 		print_tree(*(tree->childs + i), buffer); 
@@ -182,6 +186,7 @@ bool append_tree_child(node* parent, node* new_child)
 	}
 
 	parent->used_slots++;
+	new_child->parent=parent;
 
 	return true;
 }

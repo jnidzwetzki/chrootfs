@@ -11,6 +11,7 @@ typedef struct node {
 	size_t allocated_slots;  // Number of allocated slots in childs
 	size_t used_slots;       // Number of used slots in childs
 	struct node** childs;    // Child elements
+	struct node* parent;     // Parent
 } node;
 
 // Prototypes - Public

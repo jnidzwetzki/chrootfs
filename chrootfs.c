@@ -22,23 +22,35 @@ without copying any libraries or binaries.
 
 #include "tree.h"
 
+bool execute_filter(fsfilter filter, const char *name, const char *nodename, uid_t uid, gid_t gid)
+{
+	printf("Execute filter for %s (on %s)\n", name, nodename);
+	
+	if(filter != NULL) 
+		return filter(name, nodename, uid, gid);
+
+	return true;
+}
+
 bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 {
-
 	if(tree == NULL) 
 		return true;
 
-	node* element = find_tree_element(tree, name);
-		printf("Got filter for %s\n", name);
-	}
+	printf("Apply filter for %s called on %s\n", name, tree->name);
 
-	// Filter found
-	if(element != NULL) {
-		fsfilter filter = element -> ptr;
+	// Filter for Parent
+	if(execute_filter(tree->ptr, name, tree->name, uid, gid) == false)
+		return false;
+	
+	// Filter for child
+	node* child = find_tree_element(tree, name);
+	
+	if(child == NULL)
+		return true;
 
-		if(filter != NULL)
-			return filter(name, element -> name, uid, gid);
-	}
+	if(execute_filter(child->ptr, name, child->name, uid, gid) == false)
+		return false;
 
 	return true;
 }
@@ -153,6 +165,7 @@ void *chrootfs_init(struct fuse_conn_info *conn)
 	node* tree = create_tree();
 	insert_tree_element(tree, "/etc/hostname", hide_file);
 	insert_tree_element(tree, "/home", show_only_user);
+	print_tree(tree, "");
 	return (void*) tree;
 }
 

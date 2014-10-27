@@ -262,6 +262,7 @@ void get_full_name_for_node(node* mynode, char* result)
 {
 	char* name;
 	size_t i;
+	size_t new_size;
 
 	node* parent = mynode;
 	memset(result, 0, sizeof(result));
@@ -270,6 +271,13 @@ void get_full_name_for_node(node* mynode, char* result)
 		name = parent->name;
 
 		if(name[0] == '/')
+			continue;
+
+		// +2 because of '/' and '\0'
+		new_size = strlen(result) + strlen(name) + 2;
+
+		// Out of memory
+		if(new_size > sizeof(result))
 			continue;
 
 		memmove(result + strlen(name) + 1, result, strlen(result) + 2);
@@ -281,5 +289,17 @@ void get_full_name_for_node(node* mynode, char* result)
 		result[0] = '/';
 		parent = parent->parent;
 	}
+}
+
+node* get_tree_root_from_node(node* child)
+{
+	node* result;
+	result = child;
+
+	while(child->parent != child) {
+		child = child->parent;
+	}
+
+	return result;
 }
 

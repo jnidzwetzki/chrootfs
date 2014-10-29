@@ -53,7 +53,7 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 	remove_last_element_from_pathname(buffer);
 
 
-	// Filter for Parent
+	// Filter for parent
 	if(execute_filter(name, tree, uid, gid) == false)
 		return false;
 	
@@ -63,7 +63,7 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 	if(child == NULL)
 		return true;
 
-	// Dont execute child filter
+	// Don't execute child filter
 	if(child->ptr == show_only_user)
 		return true;
 

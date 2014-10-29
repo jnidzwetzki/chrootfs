@@ -26,12 +26,12 @@ without copying any libraries or binaries.
 
 #include "tree.h"
 
-bool execute_filter(fsfilter filter, const char *name, const char *nodename, uid_t uid, gid_t gid)
+bool execute_filter(fsfilter filter, const char *name, node* treenode, uid_t uid, gid_t gid)
 {
-	printf("Execute filter for %s (on %s)\n", name, nodename);
+	printf("Execute filter for %s (on %s)\n", name, treenode->name);
 	
 	if(filter != NULL) 
-		return filter(name, nodename, uid, gid);
+		return filter(name, treenode, uid, gid);
 
 	return true;
 }
@@ -44,7 +44,7 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 	printf("Apply filter for %s called on %s\n", name, tree->name);
 
 	// Filter for Parent
-	if(execute_filter(tree->ptr, name, tree->name, uid, gid) == false)
+	if(execute_filter(tree->ptr, name, tree, uid, gid) == false)
 		return false;
 	
 	// Filter for child
@@ -53,7 +53,7 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 	if(child == NULL)
 		return true;
 
-	if(execute_filter(child->ptr, name, child->name, uid, gid) == false)
+	if(execute_filter(child->ptr, name, child, uid, gid) == false)
 		return false;
 
 	return true;

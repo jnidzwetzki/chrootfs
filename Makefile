@@ -6,18 +6,20 @@ DIR = /tmp/chrootfs
 
 OBJS := filter.o tree.o chrootfs.o
 
+-include $(SRC:%.c=%.d)
+
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o chrootfs
-
--include $(SRC:%.c=%.d)
+	$(MAKE) -C tests 
 
 clean:
-	rm *.o
-	rm *.d
-	rm chrootfs
+	rm -f *.o
+	rm -f *.d
+	rm -f chrootfs
+	$(MAKE) -C tests clean
 
 mount:
 	mkdir -p $(DIR)

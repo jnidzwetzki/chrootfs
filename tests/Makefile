@@ -14,7 +14,7 @@ treetest: treetest.o $(LINKDEPS)
 -include $(SRC:%.c=%.d)
 
 clean:
-	rm *.o
-	rm *.d
-	rm treetest 
+	rm -f *.o
+	rm -f *.d
+	rm -f treetest 
 

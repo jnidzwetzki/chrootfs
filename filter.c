@@ -13,15 +13,12 @@ bool hide_file(const char* name, node* treenode, uid_t uid, gid_t gid)
 
 bool show_only_user(const char* name, node* treenode, uid_t uid, gid_t gid)
 {
-
-	printf("Filtering %s on node %s\n", name, treenode->name);
-
-	// FIXME: Compare full node name
-	char buffer[1024];
-	strncpy(buffer, "/", 2);
-	strncat(buffer, treenode->name, sizeof(buffer) - strlen(buffer) - 1);
+	char full_node_name[1024];
+	get_full_name_for_node(treenode, full_node_name, sizeof(full_node_name));
 	
-	if(strncmp(name, buffer, sizeof(buffer)) == 0)
+	printf("Filtering %s on node %s\n", name, full_node_name);
+	
+	if(strncmp(name, full_node_name, sizeof(full_node_name)) == 0)
 		return true;
 
 	if(strncmp(name, ".", sizeof(name)) == 0)

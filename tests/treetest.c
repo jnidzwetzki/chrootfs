@@ -89,7 +89,7 @@ void get_name()
 	
 	result = find_tree_element(tree, "/var/www/web5");
 	
-	get_full_name_for_node(result, buffer);
+	get_full_name_for_node(result, buffer, sizeof(buffer));
 
 	printf("Name of node is %s\n", buffer);
 

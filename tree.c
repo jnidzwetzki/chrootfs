@@ -258,17 +258,18 @@ node* find_tree_element(node* tree, const char* name)
 	return treeptr;
 }
 
-void get_full_name_for_node(node* mynode, char* result)
+void get_full_name_for_node(node* mynode, char* result, size_t result_size)
 {
 	char* name;
 	size_t i;
 	size_t new_size;
 
 	node* parent = mynode;
-	memset(result, 0, sizeof(result));
+	memset(result, 0, result_size * sizeof(char));
 
 	while(parent->parent != parent) {
 		name = parent->name;
+		parent = parent->parent;
 
 		if(name[0] == '/')
 			continue;
@@ -277,7 +278,7 @@ void get_full_name_for_node(node* mynode, char* result)
 		new_size = strlen(result) + strlen(name) + 2;
 
 		// Out of memory
-		if(new_size > sizeof(result))
+		if(new_size > result_size)
 			continue;
 
 		memmove(result + strlen(name) + 1, result, strlen(result) + 2);
@@ -287,7 +288,6 @@ void get_full_name_for_node(node* mynode, char* result)
 		}
 
 		result[0] = '/';
-		parent = parent->parent;
 	}
 }
 
@@ -303,3 +303,14 @@ node* get_tree_root_from_node(node* child)
 	return result;
 }
 
+void remove_last_element_from_pathname(char *path) 
+{
+	size_t i;
+
+	for(i = strlen(path); i >= 0; i--) {
+		if(path[i] == '\\')
+			break;
+
+		path[i] = '\0';
+	}
+}

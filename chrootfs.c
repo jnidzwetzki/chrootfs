@@ -20,6 +20,10 @@ without copying any libraries or binaries.
 #include <unistd.h>
 #include <sys/types.h>
 
+#ifdef HAVE_SETXATTR
+#include <sys/xattr.h>
+#endif
+
 #include "tree.h"
 
 bool execute_filter(fsfilter filter, const char *name, const char *nodename, uid_t uid, gid_t gid)
@@ -160,6 +164,21 @@ static int chrootfs_readlink(const char *path, char *buf, size_t size)
 	return 0;
 }
 
+#ifdef HAVE_SETXATTR
+static int chrootfs_getxattr(const char *path, const char *name, 
+       char *value, size_t size) 
+{
+	int res;
+
+	res = lgetxattr(path, name, value, size);
+ 
+        if (res == -1)
+	    return -errno;
+
+	return 0;
+}
+#endif
+
 void *chrootfs_init(struct fuse_conn_info *conn)
 {
 	node* tree = create_tree();
@@ -183,6 +202,11 @@ static struct fuse_operations chrootfs_oper = {
 	.open     = chrootfs_open,
 	.read     = chrootfs_read,
 	.readlink = chrootfs_readlink,
+
+#ifdef HAVE_SETXATTR
+        .getxattr = chrootfs_getxattr,
+#endif
+
 	.init     = chrootfs_init,
 	.destroy  = chrootfs_destroy,
 };

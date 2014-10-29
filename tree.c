@@ -92,8 +92,6 @@ node* get_tree_child(node* parent, char* name)
 		child = *(parent->childs + i);
 		child_name = child->name;
 
-		printf("Name is %s\n", child_name);
-
 		if(strcmp(child_name, name) == 0) {
 			return *(parent->childs + i);
 		}
@@ -213,7 +211,7 @@ bool insert_tree_element(node* tree, char* name, void *ptr)
 	strptr = strtok(buffer, "/");
 
 	while(strptr != NULL) {
-		printf("Sarching for %s\n", strptr);
+		printf("Seaarching for %s\n", strptr);
 		childptr = get_tree_child(treeptr, strptr);
 
 		if(childptr != NULL) {
@@ -246,7 +244,7 @@ node* find_tree_element(node* tree, const char* name)
 	strptr = strtok(buffer, "/");
 
 	while(strptr != NULL) {
-		printf("Sarching for %s\n", strptr);
+		printf("Searching for %s\n", strptr);
 		treeptr = get_tree_child(treeptr, strptr);
 
 		if(treeptr == NULL)
@@ -266,6 +264,11 @@ void get_full_name_for_node(node* mynode, char* result, size_t result_size)
 
 	node* parent = mynode;
 	memset(result, 0, result_size * sizeof(char));
+
+	if(is_tree_root(mynode)) {
+		result[0] = '/';
+		return;
+	}
 
 	while(parent->parent != parent) {
 		name = parent->name;
@@ -307,10 +310,21 @@ void remove_last_element_from_pathname(char *path)
 {
 	size_t i;
 
-	for(i = strlen(path); i >= 0; i--) {
+	// Root Element
+	if(strncmp(path, "/", 1) == 0)
+		return;
+	
+	for(i = strlen(path); i > 0; i--) {
+		
 		if(path[i] == '\\')
 			break;
 
 		path[i] = '\0';
 	}
 }
+
+bool is_tree_root(node *mynode)
+{
+	return mynode->parent == mynode;
+}
+

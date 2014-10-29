@@ -26,10 +26,14 @@ without copying any libraries or binaries.
 
 #include "tree.h"
 
-bool execute_filter(fsfilter filter, const char *name, node* treenode, uid_t uid, gid_t gid)
+bool execute_filter(const char *name, node* treenode, uid_t uid, gid_t gid)
 {
-	printf("Execute filter for %s (on %s)\n", name, treenode->name);
+	fsfilter filter;
 	
+	printf("Execute filter for %s (on %s)\n", name, treenode->name);
+
+	filter = treenode -> ptr;
+
 	if(filter != NULL) 
 		return filter(name, treenode, uid, gid);
 
@@ -38,13 +42,19 @@ bool execute_filter(fsfilter filter, const char *name, node* treenode, uid_t uid
 
 bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 {
+	char buffer[1024];
+
 	if(tree == NULL) 
 		return true;
 
-	printf("Apply filter for %s called on %s\n", name, tree->name);
+	get_full_name_for_node(tree, buffer, sizeof(buffer));
+	printf("Apply filter for %s called on %s\n", name, buffer);
+
+	remove_last_element_from_pathname(buffer);
+
 
 	// Filter for Parent
-	if(execute_filter(tree->ptr, name, tree, uid, gid) == false)
+	if(execute_filter(name, tree, uid, gid) == false)
 		return false;
 	
 	// Filter for child
@@ -53,7 +63,11 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 	if(child == NULL)
 		return true;
 
-	if(execute_filter(child->ptr, name, child, uid, gid) == false)
+	// Dont execute child filter
+	if(child->ptr == show_only_user)
+		return true;
+
+	if(execute_filter(name, child, uid, gid) == false)
 		return false;
 
 	return true;

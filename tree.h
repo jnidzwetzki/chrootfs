@@ -23,6 +23,7 @@ node* find_tree_element(node* tree, const char* name);
 void get_full_name_for_node(node* mynode, char* result, size_t result_size);
 node* get_tree_root_from_node(node* child);
 void remove_last_element_from_pathname(char *path);
+bool is_tree_root(node *mynode);
 
 // Prototypes - Private
 node* get_new_tree_node(char* name, void* ptr);

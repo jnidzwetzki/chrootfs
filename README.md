@@ -7,7 +7,7 @@ use this filesystem for providing chroot environments to users
 without copying any libraries or binaries. 
 
 ## Installation
-You can install chrootfs by running "make" and "make install"
+You can install chrootfs by running "make" and "make install". Finally, you need to enable the option *user_allow_other* in your FUSE configuration (*/etc/fuse.conf*). 
 
 ## Usage 
 Example:

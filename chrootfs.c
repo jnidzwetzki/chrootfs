@@ -47,7 +47,7 @@ bool execute_filter(const char *name, node* treenode, uid_t uid, gid_t gid)
 	
 	printf("Execute filter for %s (on %s)\n", name, treenode->name);
 
-	filter = treenode -> ptr;
+	filter = treenode->filter;
 
 	if(filter != NULL) 
 		return filter(name, treenode, uid, gid);
@@ -79,7 +79,7 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 		return true;
 
 	// Don't execute child filter
-	if(child->ptr == show_only_user)
+	if(child->filter == show_only_user)
 		return true;
 
 	if(execute_filter(name, child, uid, gid) == false)

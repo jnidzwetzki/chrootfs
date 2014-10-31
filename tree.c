@@ -32,7 +32,7 @@ void delete_tree(node* tree)
 	delete_tree_node(tree);
 }
 
-node* get_new_tree_node(char* name, void* ptr) 
+node* get_new_tree_node(char* name, fsfilter filter) 
 {
 	node* result = (node*) malloc(sizeof(node));
 	
@@ -48,7 +48,7 @@ node* get_new_tree_node(char* name, void* ptr)
 
 	strcpy(result->name, name);
 
-	result->ptr = ptr;
+	result->filter = filter;
 	result->used_slots = 0;
 	result->allocated_slots = ALLOCATE_SLOTS;
 	result->childs = (node**) malloc(ALLOCATE_SLOTS * sizeof(node*));
@@ -133,7 +133,7 @@ void print_tree(node* tree, char *parent)
 	
 	strncat(buffer, tree->name, sizeof(buffer) - strlen(buffer) - 1);
 	
-	printf("%s - Filter %02x\n", buffer, (int) tree->ptr);
+	printf("%s - Filter %02x\n", buffer, (int) tree->filter);
 
 	for(i = 0; i < tree->used_slots; i++) {
 		print_tree(*(tree->childs + i), buffer); 
@@ -189,7 +189,7 @@ bool append_tree_child(node* parent, node* new_child)
 	return true;
 }
 
-bool insert_tree_element(node* tree, char* name, void *ptr) 
+bool insert_tree_element(node* tree, char* name, fsfilter filter) 
 {
 	char *strptr;
 	char buffer[1024];
@@ -226,7 +226,7 @@ bool insert_tree_element(node* tree, char* name, void *ptr)
 		strptr = strtok(NULL, "/");
 	}
 
-	treeptr->ptr = ptr;
+	treeptr->filter = filter;
 
 	return true;
 }

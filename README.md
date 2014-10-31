@@ -6,3 +6,26 @@ files and directories from the underlaying filesystem. You can
 use this filesystem for providing chroot environments to users 
 without copying any libraries or binaries. 
 
+## Installation
+You can install chrootfs by running "make" and "make install"
+
+## Usage 
+Example:
+```
+/usr/bin/chrootfs /opt/chroot/user1
+```
+## Configuration
+The configuration file of chrootfs is */etc/chrootfs.conf*
+```
+// Sample configuration for chrootfs
+
+hide {
+        /etc/ppp
+        /etc/wvdial.conf
+        /etc/squid
+}
+
+show_only_user {
+        /home
+}
+```

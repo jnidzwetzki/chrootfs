@@ -5,6 +5,7 @@ include Makefile.inc
 DIR = /tmp/chrootfs
 
 OBJS := filter.o tree.o chrootfs.o
+LINKDEPS := parser/lexer.o parser/parser.o
 
 -include $(SRC:%.c=%.d)
 
@@ -12,8 +13,8 @@ OBJS := filter.o tree.o chrootfs.o
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 all: $(OBJS) parser
-	$(CC) $(CFLAGS) $(OBJS) -o chrootfs
 	$(MAKE) -C parser
+	$(CC) $(CFLAGS) $(OBJS) $(LINKDEPS) -o chrootfs
 	$(MAKE) -C tests 
 
 clean:

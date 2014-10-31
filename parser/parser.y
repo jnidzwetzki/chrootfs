@@ -1,9 +1,10 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "../configuration.h"
-#include "parser.h"
 
+#include "tree.h"
+#include "configuration.h"
+#include "parser.h"
 %}
 
 %token T_HIDE
@@ -31,8 +32,8 @@ SECTIONS:
 	;
 
 SECTION:
-	T_HIDE BLOCK               { printf("===== HIDE ==== \n"); print_list($2.head); destroy_list($2.head); }
-	| T_SHOW_ONLY_USER BLOCK   { printf("===== USER ==== \n"); print_list($2.head); destroy_list($2.head); }
+	T_HIDE BLOCK               { parser_handle_paths($2.head, hide_file); }
+	| T_SHOW_ONLY_USER BLOCK   { parser_handle_paths($2.head, show_only_user); }
 	;
 
 BLOCK:
@@ -50,6 +51,19 @@ PATH:
 %%
 
 extern FILE *yyin;
+
+void parser_handle_paths(ListElement *head, fsfilter filter) 
+{
+	node* tree = get_configuration();
+	ListElement *list = head;
+
+	while(list != NULL) {
+		insert_tree_element(tree, list->value, filter);
+		list = list->next;
+	}
+
+	destroy_list(head); 
+}
 
 void destroy_list(ListElement *list) 
 {
@@ -82,7 +96,7 @@ ListElement* NewListElement()
    return rv; 
 }
 
-void main(int argc, char* argv)
+void testmain(int argc, char* argv)
 {
 	FILE *myfile = fopen(CONFIGFILE, "r");
 

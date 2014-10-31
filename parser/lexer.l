@@ -1,4 +1,5 @@
 %{
+#include "tree.h"
 #include "parser.h"
 #include "parser_y.h" 
 

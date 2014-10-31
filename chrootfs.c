@@ -13,6 +13,7 @@ without copying any libraries or binaries.
 
 #include <fuse.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -25,6 +26,20 @@ without copying any libraries or binaries.
 #endif
 
 #include "tree.h"
+#include "configuration.h"
+
+extern FILE *yyin;
+void yyparse();
+
+node* get_configuration() 
+{
+	static node* tree = NULL;
+
+	if(tree == NULL) 
+		tree = create_tree();
+
+	return tree;
+}
 
 bool execute_filter(const char *name, node* treenode, uid_t uid, gid_t gid)
 {
@@ -195,9 +210,21 @@ static int chrootfs_getxattr(const char *path, const char *name,
 
 void *chrootfs_init(struct fuse_conn_info *conn)
 {
-	node* tree = create_tree();
-	insert_tree_element(tree, "/etc/hostname", hide_file);
-	insert_tree_element(tree, "/home", show_only_user);
+	node* tree = get_configuration();
+	//insert_tree_element(tree, "/etc/hostname", hide_file);
+	//insert_tree_element(tree, "/home", show_only_user);
+
+        FILE *myfile = fopen(CONFIGFILE, "r");
+
+        if(myfile == NULL) {
+                printf("Unable to open configuration file %s\n", CONFIGFILE);
+                exit(-1);
+        }   
+
+        yyin = myfile;
+        yyparse();
+        fclose(myfile);
+
 	print_tree(tree, "");
 	return (void*) tree;
 }

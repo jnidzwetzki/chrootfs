@@ -25,6 +25,7 @@ drwx------   2 root    root   4096 Apr  3  2005 lost+found
 drwxrwxrwx   4 root    staff  4096 Jun 16  2005 profiles
 drwxr-xr-x  37 svn     svn    4096 Apr  6  2009 svn
 drwxr-xr-x   9 test    users  4096 Nov  5  2012 test
+test@tusnelda:~$
 ```
 
 Run chrootfs and chroot user:
@@ -44,6 +45,7 @@ ls: cannot access /etc/squid: No such file or directory
 test@tusnelda:~$ ls -l /home
 insgesamt 4
 drwxr-xr-x 9 test users 4096 Nov  5  2012 test
+test@tusnelda:~$
 ```
 ## Configuration
 The configuration file of chrootfs is */etc/chrootfs.conf*

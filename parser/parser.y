@@ -96,8 +96,4 @@ void main(int argc, char* argv)
 	close(myfile);
 }
 
-yyerror(char *s)
-{
-	fprintf(stderr, "parsing error: %s\n", s);
-}
 

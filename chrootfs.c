@@ -1,12 +1,23 @@
 /*
+    Copyright 2014 Jan Nidzwetzki
 
-chrootfs an overlay fuse filesystem. It allows to hide certain 
-files and directories from the underlaying filesystem. You can 
-use this filesystem for providing chroot environments to users 
-without copying any libraries or binaries. 
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-2014 Jan Kristof Nidzwetzki
+    http://www.apache.org/licenses/LICENSE-2.0
 
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+    chrootfs an overlay fuse filesystem. It allows to hide certain 
+    files and directories from the underlaying filesystem. You can 
+    use this filesystem for providing chroot environments to users 
+    without copying any libraries or binaries. 
 */
 
 #define FUSE_USE_VERSION 30

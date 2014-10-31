@@ -1,5 +1,6 @@
 include ../Makefile.inc
 
+CFLAGS = -g
 CFLAGS += -I..
 #LINKDEPS = ../tree.o ../filter.o
 
@@ -8,7 +9,7 @@ CFLAGS += -I..
 parser:
 	yacc parser.y --defines=parser_y.h -o parser.c
 	lex -o lexer.c parser.l
-	gcc lexer.c parser.c -lfl
+	gcc  $(CFLAGS) lexer.c parser.c -lfl
 
 clean:
 	rm -f *.o

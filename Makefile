@@ -1,6 +1,6 @@
 include Makefile.inc
 
-.PHONY: all clean mount umount parser
+.PHONY: all clean mount umount install uninstall
 
 DIR = /tmp/chrootfs
 
@@ -16,6 +16,15 @@ all: $(OBJS) parser
 	$(MAKE) -C parser
 	$(CC) $(CFLAGS) $(OBJS) $(LINKDEPS) -o chrootfs
 	$(MAKE) -C tests 
+
+install: all
+	cp chrootfs.conf $(DESTDIR)/etc
+	cp chrootfs $(DESTDIR)/usr/bin
+	chmod 755 $(DESTDIR)/usr/bin/chrootfs
+
+uninstall:
+	rm -f $(DESTDIR)/etc/chrootfs.conf
+	rm -f $(DESTDIR)/usr/bin/chrootfs
 
 clean:
 	rm -f *.o

@@ -211,8 +211,6 @@ static int chrootfs_getxattr(const char *path, const char *name,
 void *chrootfs_init(struct fuse_conn_info *conn)
 {
 	node* tree = get_configuration();
-	//insert_tree_element(tree, "/etc/hostname", hide_file);
-	//insert_tree_element(tree, "/home", show_only_user);
 
         FILE *myfile = fopen(CONFIGFILE, "r");
 

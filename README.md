@@ -9,6 +9,14 @@ without copying any libraries or binaries.
 ## Installation
 You can install chrootfs by running "make" and "make install". Finally, you need to enable the option *user_allow_other* in your FUSE configuration (*/etc/fuse.conf*). 
 
+### Dependencies
+
+chrootfs depends on fuse, pkg-config, bison, flex
+
+```
+apt-get install fuse libfuse-dev pkg-config bison flex
+```
+
 ## Example 
 Before:
 ```

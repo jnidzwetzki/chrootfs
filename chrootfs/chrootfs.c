@@ -204,6 +204,30 @@ static int chrootfs_readlink(const char *path, char *buf, size_t size)
 	return 0;
 }
 
+static int chrootfs_chmod(const char *path, mode_t mode)
+{
+	int res;
+
+	res = chmod(path, mode);
+
+	if (res == -1)
+		return -errno;
+
+        return 0;
+}
+
+static int chrootfs_chown(const char *path, uid_t uid, gid_t gid)
+{
+        int res;
+
+	res = lchown(path, uid, gid);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -252,6 +276,8 @@ static struct fuse_operations chrootfs_oper = {
 	.open     = chrootfs_open,
 	.read     = chrootfs_read,
 	.readlink = chrootfs_readlink,
+	.chmod    = chrootfs_chmod,
+	.chown    = chrootfs_chown,
 
 #ifdef HAVE_SETXATTR
         .getxattr = chrootfs_getxattr,

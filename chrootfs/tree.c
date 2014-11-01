@@ -150,7 +150,7 @@ void print_tree(node* tree, char *parent)
 	
 	strncat(buffer, tree->name, sizeof(buffer) - strlen(buffer) - 1);
 	
-	printf("%s - Filter %02x\n", buffer, (int) tree->filter);
+	printf("%s - Filter %p\n", buffer, tree->filter);
 
 	for(i = 0; i < tree->used_slots; i++) {
 		print_tree(*(tree->childs + i), buffer); 

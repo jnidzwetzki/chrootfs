@@ -228,6 +228,31 @@ static int chrootfs_chown(const char *path, uid_t uid, gid_t gid)
 	return 0;
 }
 
+
+static int chrootfs_rmdir(const char *path)
+{
+	int res;
+
+	res = rmdir(path);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int chrootfs_mkdir(const char *path, mode_t mode)
+{
+	int res;
+
+	res = mkdir(path, mode);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -278,6 +303,8 @@ static struct fuse_operations chrootfs_oper = {
 	.readlink = chrootfs_readlink,
 	.chmod    = chrootfs_chmod,
 	.chown    = chrootfs_chown,
+	.mkdir    = chrootfs_mkdir,
+	.rmdir    = chrootfs_rmdir,
 
 #ifdef HAVE_SETXATTR
         .getxattr = chrootfs_getxattr,

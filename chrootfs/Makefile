@@ -16,6 +16,8 @@ all: $(OBJS) parser
 	$(MAKE) -C tests 
 
 install: all
+	mkdir -p $(DESTDIR)/etc
+	mkdir -p $(DESTDIR)/usr/bin
 	cp chrootfs.conf $(DESTDIR)/etc
 	cp chrootfs $(DESTDIR)/usr/bin
 	chmod 755 $(DESTDIR)/usr/bin/chrootfs

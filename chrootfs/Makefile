@@ -1,8 +1,6 @@
 include Makefile.inc
 
-.PHONY: all clean mount umount install uninstall
-
-DIR = /tmp/chrootfs
+.PHONY: all clean install uninstall
 
 OBJS := filter.o tree.o chrootfs.o
 LINKDEPS := parser/lexer.o parser/parser.o
@@ -33,9 +31,3 @@ clean:
 	$(MAKE) -C parser clean
 	$(MAKE) -C tests clean
 
-mount:
-	mkdir -p $(DIR)
-	./chrootfs $(DIR)
-
-umount:	
-	fusermount -u $(DIR)

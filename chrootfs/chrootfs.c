@@ -40,7 +40,7 @@
 #include "configuration.h"
 
 extern FILE *yyin;
-void yyparse();
+int yyparse();
 
 node* get_configuration() 
 {
@@ -304,22 +304,37 @@ static int chrootfs_removexattr(const char *path, const char *name)
 }
 #endif
 
-void *chrootfs_init(struct fuse_conn_info *conn)
+bool parse_configuration()
 {
-	node* tree = get_configuration();
+	int res;
+	node* tree;
+	FILE *myfile;
 
-        FILE *myfile = fopen(CONFIGFILE, "r");
+        myfile = fopen(CONFIGFILE, "r");
 
         if(myfile == NULL) {
                 printf("Unable to open configuration file %s\n", CONFIGFILE);
-                exit(-1);
-        }   
+        	return false;
+	}   
+	
+	tree = get_configuration();
 
         yyin = myfile;
-        yyparse();
+        res = yyparse();
         fclose(myfile);
 
+	if(res != 0)
+		return false;
+	
 	print_tree(tree, "");
+
+	return true;
+}
+
+void *chrootfs_init(struct fuse_conn_info *conn)
+{
+	node* tree = get_configuration();
+	
 	return (void*) tree;
 }
 
@@ -355,6 +370,15 @@ static struct fuse_operations chrootfs_oper = {
 
 int main(int argc, char *argv[])
 {
+	bool result;
+
+	result = parse_configuration();
+	
+	if(! result) {
+		printf("Error in configfile, exiting\n");
+		exit(-1);
+	}
+	
 	return fuse_main(argc, argv, &chrootfs_oper, NULL);
 }
 

@@ -30,9 +30,7 @@ show_only_user          { return T_SHOW_ONLY_USER; }
 
 
 %% 
-int yyerror( const char* str )
+void yyerror( const char* str )
 {
         fprintf( stderr, "ERROR: %s (line %d)\n", str, gLineNumber );
-	        
-        return 0;
 }

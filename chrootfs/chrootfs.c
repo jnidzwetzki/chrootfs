@@ -301,6 +301,18 @@ static int chrootfs_link(const char *from, const char *to)
 	return 0;
 }
 
+static int chrootfs_truncate(const char *path, off_t size)
+{
+	int res;
+
+	res = truncate(path, size);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -408,6 +420,7 @@ static struct fuse_operations chrootfs_oper = {
 	.link        = chrootfs_link,
 	.symlink     = chrootfs_symlink,
 	.rename      = chrootfs_rename,
+	.truncate    = chrootfs_truncate,
 
 #ifdef HAVE_SETXATTR
         .getxattr    = chrootfs_getxattr,

@@ -25,7 +25,7 @@ typedef struct ListElement
 } ListElement;
 
 // Prototypes
-ListElement* NewListElement();
+ListElement* new_list_element();
 void print_list(ListElement *list);
 void destroy_list(ListElement *list);
 void parser_handle_paths(ListElement *head, fsfilter filter);

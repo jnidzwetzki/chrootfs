@@ -46,7 +46,7 @@ PATHS:
 	;
 
 PATH: 
-	T_PATH { $$ = NewListElement(); $$->value = $1;}
+	T_PATH { $$ = new_list_element(); $$->value = $1;}
     	;
 %%
 
@@ -89,7 +89,7 @@ void print_list(ListElement *list)
    }
 }
 
-ListElement* NewListElement() 
+ListElement* new_list_element() 
 {
    ListElement *rv = malloc(sizeof(ListElement));
    rv->next = NULL;

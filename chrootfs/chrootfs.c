@@ -266,6 +266,42 @@ static int chrootfs_getxattr(const char *path, const char *name,
 
 	return 0;
 }
+
+static int chrootfs_setxattr(const char *path, const char *name, const char *value, size_t size, int flags)
+{
+	int res;
+
+	res = lsetxattr(path, name, value, size, flags);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int chrootfs_listxattr(const char *path, char *list, size_t size)
+{
+	int res;
+
+	res = llistxattr(path, list, size);
+
+	if (res == -1)
+		return -errno;
+
+	return res;
+}
+
+static int chrootfs_removexattr(const char *path, const char *name)
+{
+	int res;
+
+	res = lremovexattr(path, name);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
 #endif
 
 void *chrootfs_init(struct fuse_conn_info *conn)
@@ -296,22 +332,25 @@ void chrootfs_destroy(void *ptr)
 }
 
 static struct fuse_operations chrootfs_oper = {
-	.getattr  = chrootfs_getattr,
-	.readdir  = chrootfs_readdir,
-	.open     = chrootfs_open,
-	.read     = chrootfs_read,
-	.readlink = chrootfs_readlink,
-	.chmod    = chrootfs_chmod,
-	.chown    = chrootfs_chown,
-	.mkdir    = chrootfs_mkdir,
-	.rmdir    = chrootfs_rmdir,
+	.getattr     = chrootfs_getattr,
+	.readdir     = chrootfs_readdir,
+	.open        = chrootfs_open,
+	.read        = chrootfs_read,
+	.readlink    = chrootfs_readlink,
+	.chmod       = chrootfs_chmod,
+	.chown       = chrootfs_chown,
+	.mkdir       = chrootfs_mkdir,
+	.rmdir       = chrootfs_rmdir,
 
 #ifdef HAVE_SETXATTR
-        .getxattr = chrootfs_getxattr,
+        .getxattr    = chrootfs_getxattr,
+	.setxattr    = chrootfs_setxattr,
+	.listxattr   = chrootfs_listxattr,
+	.removexattr = chrootfs_removexattr,
 #endif
 
-	.init     = chrootfs_init,
-	.destroy  = chrootfs_destroy,
+	.init        = chrootfs_init,
+	.destroy     = chrootfs_destroy,
 };
 
 int main(int argc, char *argv[])

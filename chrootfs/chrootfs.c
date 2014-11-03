@@ -253,6 +253,54 @@ static int chrootfs_mkdir(const char *path, mode_t mode)
 	return 0;
 }
 
+static int chrootfs_unlink(const char *path)
+{
+	int res;
+
+	res = unlink(path);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int chrootfs_symlink(const char *from, const char *to)
+{
+	int res;
+
+	res = symlink(from, to);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int chrootfs_rename(const char *from, const char *to)
+{
+	int res;
+
+	res = rename(from, to);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int chrootfs_link(const char *from, const char *to)
+{
+	int res;
+
+	res = link(from, to);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -356,6 +404,10 @@ static struct fuse_operations chrootfs_oper = {
 	.chown       = chrootfs_chown,
 	.mkdir       = chrootfs_mkdir,
 	.rmdir       = chrootfs_rmdir,
+	.unlink      = chrootfs_unlink,
+	.link        = chrootfs_link,
+	.symlink     = chrootfs_symlink,
+	.rename      = chrootfs_rename,
 
 #ifdef HAVE_SETXATTR
         .getxattr    = chrootfs_getxattr,

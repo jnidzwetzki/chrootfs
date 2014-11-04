@@ -160,6 +160,26 @@ static int chrootfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	return 0;
 }
 
+static int chrootfs_access(const char *path, int mask)
+{
+	int res;
+
+	node *tree = (node*)fuse_get_context()->private_data;
+	uid_t uid = fuse_get_context()->uid;
+	gid_t gid = fuse_get_context()->gid;
+
+	if(! apply_filter(tree, path, uid, gid)) {
+		return -ENOENT;
+	}
+
+	res = access(path, mask);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 static int chrootfs_open(const char *path, struct fuse_file_info *fi)
 {
 	int res;
@@ -314,6 +334,39 @@ static int chrootfs_truncate(const char *path, off_t size)
 	return 0;
 }
 
+static int chrootfs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
+{
+	int fd;
+	int res;
+	(void) fi;
+
+	fd = open(path, O_WRONLY);
+
+	if (fd == -1)
+		return -errno;
+
+	res = pwrite(fd, buf, size, offset);
+
+	if (res == -1)
+		res = -errno;
+
+	close(fd);
+
+	return res;
+}
+
+static int chrootfs_statfs(const char *path, struct statvfs *stbuf)
+{
+	int res;
+
+	res = statvfs(path, stbuf);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -410,6 +463,7 @@ void chrootfs_destroy(void *ptr)
 static struct fuse_operations chrootfs_oper = {
 	.getattr     = chrootfs_getattr,
 	.readdir     = chrootfs_readdir,
+	.access      = chrootfs_access,
 	.open        = chrootfs_open,
 	.read        = chrootfs_read,
 	.readlink    = chrootfs_readlink,
@@ -422,6 +476,8 @@ static struct fuse_operations chrootfs_oper = {
 	.symlink     = chrootfs_symlink,
 	.rename      = chrootfs_rename,
 	.truncate    = chrootfs_truncate,
+	.write       = chrootfs_write,
+	.statfs      = chrootfs_statfs,
 
 #ifdef HAVE_SETXATTR
         .getxattr    = chrootfs_getxattr,

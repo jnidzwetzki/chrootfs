@@ -98,23 +98,26 @@ void delete_tree_node(node* node)
 	free(node);
 }
 
+// a is the key (type char*), b is an element from our haystack (type node*)
+int cmp_tree_node(const void *a, const void *b)
+{
+	char* char_a = (char*) a;
+	node* node_b = *((node**) b);
+
+	return strcmp(char_a, node_b->name);
+}
+
 node* get_tree_child(node* parent, char* name) 
 {
-	size_t i;
-	node* child;
-	char* child_name;
+	node** child;
 
-	//TODO: Refactor to binary search
-	for(i = 0; i < parent->used_slots; i++) {
-		child = *(parent->childs + i);
-		child_name = child->name;
+	child = bsearch(name, parent->childs, parent->used_slots, 
+		sizeof(node**), cmp_tree_node);
 
-		if(strcmp(child_name, name) == 0) {
-			return *(parent->childs + i);
-		}
-	}
+	if(child == NULL)
+		return NULL;
 
-	return NULL;
+	return *(child);
 }
 
 bool allocate_new_tree_slots(node* parent, size_t slots)
@@ -175,6 +178,8 @@ bool append_tree_child(node* parent, node* new_child)
 	bool result;
 	bool inserted = false;
 
+	printf("Appending %s under %s\n", new_child->name, parent->name);
+
 	if(parent->used_slots == parent->allocated_slots) {
 		result = allocate_new_tree_slots(parent, ALLOCATE_SLOTS);
 
@@ -187,7 +192,7 @@ bool append_tree_child(node* parent, node* new_child)
 	for(i = 0; i < parent->used_slots; i++) {
 		child_name = (*(parent->childs + i))->name;
 
-		if(strcmp(child_name, new_child->name) == 1) {
+		if(strcmp(new_child->name, child_name) < 0) {
 			shift_tree_childs(parent, i);
 			*(parent->childs + i) = new_child;
 			inserted = true;

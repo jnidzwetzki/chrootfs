@@ -4,15 +4,19 @@ DIR = /tmp/chrootfs
 
 all: 
 	$(MAKE) -C chrootfs all
+	$(MAKE) -C pam all
 
 install: all
 	$(MAKE) -C chrootfs install
+	$(MAKE) -C pam install
 
 uninstall:
 	$(MAKE) -C chrootfs uninstall
+	$(MAKE) -C pam uninstall
 
 clean:
 	$(MAKE) -C chrootfs clean
+	$(MAKE) -C pam clean
 
 mount: all
 	mkdir -p $(DIR)

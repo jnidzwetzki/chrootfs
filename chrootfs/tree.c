@@ -49,7 +49,7 @@ void delete_tree(node* tree)
 	delete_tree_node(tree);
 }
 
-node* get_new_tree_node(char* name, fsfilter filter) 
+node* get_new_tree_node(char* name, fsfilter* filter) 
 {
 	node* result = (node*) malloc(sizeof(node));
 	
@@ -211,7 +211,7 @@ bool append_tree_child(node* parent, node* new_child)
 	return true;
 }
 
-bool insert_tree_element(node* tree, char* name, fsfilter filter) 
+bool insert_tree_element(node* tree, char* name, fsfilter* filter) 
 {
 	char *strptr;
 	char buffer[1024];

@@ -22,12 +22,12 @@
 
 #include "tree.h"
 
-bool hide_file(const char* name, node* treenode, uid_t uid, gid_t gid)
+bool hide_file_func(const char* name, node* treenode, uid_t uid, gid_t gid)
 {
 	return false;
 }
 
-bool show_only_user(const char* name, node* treenode, uid_t uid, gid_t gid)
+bool show_only_user_func(const char* name, node* treenode, uid_t uid, gid_t gid)
 {
 	
 	printf("Filtering %s on node %s\n", name, treenode->name);
@@ -46,3 +46,15 @@ bool show_only_user(const char* name, node* treenode, uid_t uid, gid_t gid)
 
 	return false;
 }
+
+fsfilter hide_file = {
+	.func = hide_file_func,
+	.execute_on_parent = true,
+	.execute_on_child = true,
+};
+
+fsfilter show_only_user = {
+	.func = show_only_user_func,
+	.execute_on_parent = true,
+	.execute_on_child = false,
+};

@@ -54,14 +54,14 @@ node* get_configuration()
 
 bool execute_filter(const char *name, node* treenode, uid_t uid, gid_t gid)
 {
-	fsfilter filter;
+	fsfilter* filter;
 	
 	printf("Execute filter for %s (on %s)\n", name, treenode->name);
 
 	filter = treenode->filter;
 
 	if(filter != NULL) 
-		return filter(name, treenode, uid, gid);
+		return filter->func(name, treenode, uid, gid);
 
 	return true;
 }
@@ -78,10 +78,12 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 
 	remove_last_element_from_pathname(buffer);
 
-
 	// Filter for parent
-	if(execute_filter(name, tree, uid, gid) == false)
-		return false;
+	if(tree->filter != NULL) {
+		if(tree->filter->execute_on_parent == true)
+			if(execute_filter(name, tree, uid, gid) == false)
+				return false;
+	}
 	
 	// Filter for child
 	node* child = find_tree_element(tree, name);
@@ -89,12 +91,11 @@ bool apply_filter(node* tree, const char *name, uid_t uid, gid_t gid)
 	if(child == NULL)
 		return true;
 
-	// Don't execute child filter
-	if(child->filter == show_only_user)
-		return true;
-
-	if(execute_filter(name, child, uid, gid) == false)
-		return false;
+	if(child->filter != NULL) {
+		if(child->filter->execute_on_child == true)
+			if(execute_filter(name, child, uid, gid) == false)
+				return false;
+	}
 
 	return true;
 }

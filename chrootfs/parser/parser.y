@@ -32,8 +32,8 @@ SECTIONS:
 	;
 
 SECTION:
-	T_HIDE BLOCK               { parser_handle_paths($2.head, hide_file); }
-	| T_SHOW_ONLY_USER BLOCK   { parser_handle_paths($2.head, show_only_user); }
+	T_HIDE BLOCK               { parser_handle_paths($2.head, &hide_file); }
+	| T_SHOW_ONLY_USER BLOCK   { parser_handle_paths($2.head, &show_only_user); }
 	;
 
 BLOCK:
@@ -52,7 +52,7 @@ PATH:
 
 extern FILE *yyin;
 
-void parser_handle_paths(ListElement *head, fsfilter filter) 
+void parser_handle_paths(ListElement *head, fsfilter* filter) 
 {
 	node* tree = get_configuration();
 	ListElement *list = head;

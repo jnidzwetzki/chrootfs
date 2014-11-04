@@ -98,7 +98,7 @@ void delete_tree_node(node* node)
 	free(node);
 }
 
-// a is the key (type char*), b is an element from our haystack (type node*)
+// a is the key (type char*), b is an element from our haystack (type node**)
 int cmp_tree_node(const void *a, const void *b)
 {
 	char* char_a = (char*) a;

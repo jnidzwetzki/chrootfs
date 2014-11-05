@@ -10,9 +10,11 @@ LINKDEPS := parser/lexer.o parser/parser.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-all: $(OBJS) parser
+chrootfs: $(OBJS)
 	$(MAKE) -C parser
 	$(CC) $(CFLAGS) $(OBJS) $(LINKDEPS) -o chrootfs
+
+all: chrootfs 
 	$(MAKE) -C tests 
 
 install: all

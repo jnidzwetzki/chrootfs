@@ -19,8 +19,9 @@ clean:
 	rm -f chrootfs_pam.so
 
 install: chrootfs_pam.so
+	mkdir -p $(INSTALLDIR)
 	cp chrootfs_pam.so $(INSTALLDIR)
-	
+
 uninstall:
 	rm -f $(INSTALLDIR)/chrootfs_pam.so
 

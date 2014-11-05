@@ -31,6 +31,7 @@
 #define PAM_CHROOT_ERROR -1
 
 #define CHROOTFS_DIR "/var/chroot"
+#define CHROOTFS_BIN "/usr/bin/chrootfs"
 
 void chrootfs_pam_log(int err, const char *format, ...)
 {
@@ -57,19 +58,26 @@ bool check_dir_exists(char *dirname)
 	return false;
 }
 
-int mount_chrootfs(char *username)
+bool mount_chrootfs(char *username)
 {
-	// TODO: Check dir length
-	char check_dir[1024];
-	strcpy(check_dir, CHROOTFS_DIR);
-	strcat(check_dir, "/");
-	strcat(check_dir, username);
-	strcat(check_dir, "/bin");
+	size_t check_dir_length = 1024;
+	char check_dir[check_dir_length];
+
+	size_t mount_command_length = 1024;
+	char mount_command[mount_command_length];
+	
+	strncpy(check_dir, CHROOTFS_DIR, check_dir_length - 1);
+	strncat(check_dir, "/", check_dir_length - strlen(check_dir) - 2);
+	strncat(check_dir, username, check_dir_length - strlen(check_dir) - strlen(username));
+	strncat(check_dir, "/bin", check_dir_length - strlen(check_dir) - 5);
 
 	if(check_dir_exists(check_dir) != true) {
+		strncpy(mount_command, CHROOTFS_BIN, mount_command_length - 1);
+
 		// Mount chrootfs
 	}
 
+	return true;
 }
 
 int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv) 
@@ -89,7 +97,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 		return PAM_CHROOT_ERROR;
 	}
 
-	if(mount_chrootfs(username) == -1) {
+	if(mount_chrootfs(username) != true) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to mount chrootfs for user %s", CHROOTFS_DIR);
 		return PAM_CHROOT_ERROR;
 	}

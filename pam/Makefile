@@ -2,7 +2,13 @@
 
 CFLAGS := -fPIC -DPIC -shared -rdynamic 
 
-INSTALLDIR := $(DESTDIR)/lib/i386-linux-gnu/security
+LBITS := $(shell getconf LONG_BIT)
+
+ifeq ($(LBITS),64)
+	INSTALLDIR := $(DESTDIR)/lib/x86_64-linux-gnu/security
+else
+	INSTALLDIR := $(DESTDIR)/lib/i386-linux-gnu/security
+endif
 
 all: chrootfs_pam.so
 

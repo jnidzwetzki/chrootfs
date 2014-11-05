@@ -1,0 +1,12 @@
+Source: chrootfs
+Section: utilities
+Priority: extra
+Maintainer: Jan Nidzwetzki <jnidzwetzki@gmx.de>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: chrootfs
+Architecture: all
+Depends: fuse, libfuse-dev, pkg-config, bison, flex, libpam0g-dev
+Description: chrootfs - an overlay filesystem for chroot environments based on fuse
+   chrootfs an overlay fuse filesystem. It allows to hide certain files and directories from the underlaying filesystem. You can use this filesystem for providing chroot environments to users without copying any libraries or binaries. 

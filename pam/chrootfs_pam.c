@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <syslog.h>
 #include <stdbool.h>
 #include <sys/types.h>
@@ -42,18 +43,33 @@ void chrootfs_pam_log(int err, const char *format, ...)
 	closelog();
 }
 
-bool chroot_dir_exists()
+bool check_dir_exists(char *dirname)
 {
 	int err;
 	struct stat s;
 
-	err = stat(CHROOTFS_DIR, &s);
+	err = stat(dirname, &s);
 
 	if(err != -1)
 		if(S_ISDIR(s.st_mode))
 			return true;
 
 	return false;
+}
+
+int mount_chrootfs(char *username)
+{
+	// TODO: Check dir length
+	char check_dir[1024];
+	strcpy(check_dir, CHROOTFS_DIR);
+	strcat(check_dir, "/");
+	strcat(check_dir, username);
+	strcat(check_dir, "/bin");
+
+	if(check_dir_exists(check_dir) != true) {
+		// Mount chrootfs
+	}
+
 }
 
 int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv) 
@@ -68,11 +84,15 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 		return PAM_CHROOT_ERROR;
 	}
 
-	if(chroot_dir_exists() != true) {
+	if(check_dir_exists(CHROOTFS_DIR) != true) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to open chroot dir %s", CHROOTFS_DIR);
 		return PAM_CHROOT_ERROR;
 	}
 
+	if(mount_chrootfs(username) == -1) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to mount chrootfs for user %s", CHROOTFS_DIR);
+		return PAM_CHROOT_ERROR;
+	}
 
 	return(PAM_IGNORE);
 }

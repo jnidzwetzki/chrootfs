@@ -19,13 +19,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <security/pam_appl.h>
 
-#define PAM_SM_AUTH
-#define PAM_SM_ACCOUNT
+//#define PAM_SM_AUTH
+//#define PAM_SM_ACCOUNT
 #define PAM_SM_SESSION
 
 #define PAM_CHROOT_ERROR -1
@@ -80,7 +81,7 @@ bool mount_chrootfs(char *username)
 	return true;
 }
 
-int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv) 
+int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
 {
 	int err;
 	char *username;
@@ -102,7 +103,11 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 		return PAM_CHROOT_ERROR;
 	}
 
-	return(PAM_IGNORE);
+	return PAM_SUCCESS;
 }
 
+int pam_sm_close_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 
+{
+	return PAM_SUCCESS;
+}
 

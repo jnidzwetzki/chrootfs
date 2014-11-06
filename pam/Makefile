@@ -12,17 +12,17 @@ endif
 
 all: chrootfs_pam.so
 
-chrootfs_pam.so: chrootfs_pam.c 
-	$(CC) $(CFLAGS) -o chrootfs_pam.so chrootfs_pam.c 
+chrootfs_pam.so: pam_chrootfs.c 
+	$(CC) $(CFLAGS) -o pam_chrootfs.so pam_chrootfs.c 
 
 clean:
-	rm -f chrootfs_pam.so
+	rm -f pam_chrootfs.so
 
-install: chrootfs_pam.so
+install: pam_chrootfs.so
 	mkdir -p $(INSTALLDIR)
-	cp chrootfs_pam.so $(INSTALLDIR)
+	cp pam_chrootfs.so $(INSTALLDIR)
 	mkdir -p $(DESTDIR)/var/chrootfs
 
 uninstall:
-	rm -f $(INSTALLDIR)/chrootfs_pam.so
+	rm -f $(INSTALLDIR)/pam_chrootfs.so
 

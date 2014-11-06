@@ -12,7 +12,7 @@ You can install chrootfs by running "make" and "make install". Finally, you need
 On Debian based systems you can build a .deb package by running *dpkg-buildpackage -rfakeroot*.
 
 ### Configuring PAM
-Add the following lines to all of the services that should use chrootfs (e.g. /etc/pam.d/{sshd, su, login, cron}).
+Add the following lines to all of the services they should use chrootfs (e.g. /etc/pam.d/{sshd, su, login, cron}).
 
 ```
 #chrootfs

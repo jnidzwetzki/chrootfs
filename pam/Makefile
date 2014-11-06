@@ -4,11 +4,7 @@ CFLAGS := -fPIC -DPIC -shared -rdynamic
 
 LBITS := $(shell getconf LONG_BIT)
 
-ifeq ($(LBITS),64)
-	INSTALLDIR := $(DESTDIR)/lib/x86_64-linux-gnu/security
-else
-	INSTALLDIR := $(DESTDIR)/lib/i386-linux-gnu/security
-endif
+INSTALLDIR := $(DESTDIR)/lib/security
 
 all: chrootfs_pam.so
 

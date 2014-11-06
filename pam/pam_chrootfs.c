@@ -16,6 +16,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <syslog.h>
@@ -25,14 +26,61 @@
 #include <sys/stat.h>
 #include <security/pam_appl.h>
 
-//#define PAM_SM_AUTH
-//#define PAM_SM_ACCOUNT
 #define PAM_SM_SESSION
 
 #define PAM_CHROOT_ERROR -1
 
 #define CHROOTFS_DIR "/var/chrootfs"
 #define CHROOTFS_BIN "/usr/bin/chrootfs"
+
+#define DEFAULT_TEXT_LENGTH 1024
+
+// Structs
+typedef struct text {
+	char *text;
+	size_t size;
+} text;
+
+text* new_text() 
+{
+	text* result = (text*) malloc(sizeof(text));
+
+	// Out of memory
+	if(result == NULL)
+		return NULL;
+
+	memset(result, 0, sizeof(text));
+
+	result->size = DEFAULT_TEXT_LENGTH;
+	result->text = (char*) malloc(DEFAULT_TEXT_LENGTH * sizeof(char));
+
+	// Out of memory
+	if(result->text == NULL) {
+		free(result);
+		return NULL;
+	}
+
+	return result;
+}
+
+size_t get_free_space(text* mytext)
+{
+	if(mytext == NULL)
+		return -1;
+
+	return mytext->size - strlen(mytext->text) - 1;
+}
+
+void free_text(text* mytext)
+{
+	if(mytext == NULL)
+		return;
+	
+	if(mytext->text != NULL)
+		free(mytext->text);
+
+	free(mytext);
+}
 
 void chrootfs_pam_log(int err, const char *format, ...)
 {
@@ -59,26 +107,56 @@ bool check_dir_exists(char *dirname)
 	return false;
 }
 
+//TODO: Refacor
 bool mount_chrootfs(char *username)
 {
-	size_t check_dir_length = 1024;
-	char check_dir[check_dir_length];
+	bool result;
 
-	size_t mount_command_length = 1024;
-	char mount_command[mount_command_length];
+	text* dest_dir;
+	text* check_dir;
+	text* mount_command;
+
+	result = true;
+
+	dest_dir = new_text();
+	check_dir = new_text();
+	mount_command = new_text();
 	
-	strncpy(check_dir, CHROOTFS_DIR, check_dir_length - 1);
-	strncat(check_dir, "/", check_dir_length - strlen(check_dir) - 2);
-	strncat(check_dir, username, check_dir_length - strlen(check_dir) - strlen(username));
-	strncat(check_dir, "/bin", check_dir_length - strlen(check_dir) - 5);
+	if(dest_dir == NULL || check_dir == NULL || mount_command == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory");
+		result = false;
+	} else {
+		// Build mount path
+		strncpy(dest_dir->text, CHROOTFS_DIR, get_free_space(dest_dir));
+		strncat(dest_dir->text, "/", get_free_space(dest_dir));
+		strncat(dest_dir->text, username, get_free_space(dest_dir));
+	
+		if(check_dir_exists(dest_dir->text) == false) {
+			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: dir %s does not exist, no chroot required", dest_dir->text);
+		} else {
 
-	if(check_dir_exists(check_dir) != true) {
-		strncpy(mount_command, CHROOTFS_BIN, mount_command_length - 1);
+			// Build check dir
+			strncpy(check_dir->text, dest_dir->text, get_free_space(check_dir));
+			strncat(check_dir->text, "/bin", get_free_space(check_dir) - 4);
 
-		// Mount chrootfs
+			if(check_dir_exists(check_dir->text) != true) {
+				strncpy(mount_command->text, CHROOTFS_BIN, get_free_space(mount_command));
+				strncat(mount_command->text, " ", get_free_space(mount_command));
+				strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
+				strncat(mount_command->text, " ", get_free_space(mount_command));
+				strncat(mount_command->text, "-o allow_root", get_free_space(mount_command));
+			
+				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s", mount_command->text);
+				chroot(dest_dir->text);
+			}
+		}
 	}
+	
+	free(dest_dir);
+	free(check_dir);
+	free(mount_command);
 
-	return true;
+	return result;
 }
 
 int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **argv) 

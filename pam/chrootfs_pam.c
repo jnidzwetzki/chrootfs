@@ -30,7 +30,7 @@
 
 #define PAM_CHROOT_ERROR -1
 
-#define CHROOTFS_DIR "/var/chroot"
+#define CHROOTFS_DIR "/var/chrootfs"
 #define CHROOTFS_BIN "/usr/bin/chrootfs"
 
 void chrootfs_pam_log(int err, const char *format, ...)

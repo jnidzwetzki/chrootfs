@@ -9,8 +9,17 @@ without copying any libraries or binaries.
 ## Installation
 You can install chrootfs by running "make" and "make install". Finally, you need to enable the option *user_allow_other* in your FUSE configuration (*/etc/fuse.conf*). 
 
-### Dependencies
+On Debian based systems you can build a .deb package by running *dpkg-buildpackage -rfakeroot*.
 
+### Configuring PAM
+Add the following lines to all of the services that should use chrootfs (e.g. /etc/pam.d/{sshd, su, login, cron}).
+
+```
+#chrootfs
+session    required     pam_chrootfs.so
+```
+
+### Dependencies
 chrootfs depends on fuse, pkg-config, bison, flex and pam
 
 ```

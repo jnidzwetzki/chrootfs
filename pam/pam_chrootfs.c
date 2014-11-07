@@ -138,8 +138,7 @@ bool mount_fuse_fs(text* dest_dir)
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s", mount_command->text);
 	}
 
-	if(mount_command != NULL)
-		free(mount_command);
+	free_text(mount_command);
 
 	return result;
 }
@@ -167,8 +166,7 @@ bool mount_chrootfs(text* dest_dir)
 			chroot(dest_dir->text);
 	}
 
-	if(check_dir != NULL)
-		free(check_dir);
+	free_text(check_dir);
 
 	return result;
 }
@@ -194,8 +192,7 @@ bool test_and_mount_chrootfs(char *username)
 		}
 	}
 	
-	if(dest_dir != NULL)
-		free(dest_dir);
+	free_text(dest_dir);
 
 	return result;
 }

@@ -122,18 +122,37 @@ void get_mount_command(text* mount_command, text* dest_dir)
 	strncat(mount_command->text, " -o allow_root", get_free_space(mount_command));
 }
 
-bool mount_chrootfs(text* dest_dir)
+bool mount_fuse_fs(text* dest_dir)
 {
 	bool result;
-	
-	text* check_dir;
 	text* mount_command;
-	
-	check_dir = new_text();
+
 	mount_command = new_text();
 	result = true;
+
+	if(mount_command == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory");
+		result = false;
+	} else {
+		get_mount_command(mount_command, dest_dir);
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s", mount_command->text);
+	}
+
+	if(mount_command != NULL)
+		free(mount_command);
+
+	return result;
+}
+
+bool mount_chrootfs(text* dest_dir)
+{
+	bool result;	
+	text* check_dir;
 	
-	if(check_dir == NULL || mount_command == NULL) {
+	check_dir = new_text();
+	result = true;
+	
+	if(check_dir == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory");
 		result = false;
 	} else {
@@ -141,24 +160,22 @@ bool mount_chrootfs(text* dest_dir)
 		strncpy(check_dir->text, dest_dir->text, get_free_space(check_dir));
 		strncat(check_dir->text, "/bin", get_free_space(check_dir) - 4);
 
-		if(check_dir_exists(check_dir->text) != true) {
-			get_mount_command(mount_command, dest_dir);
-			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s", mount_command->text);
+		if(check_dir_exists(check_dir->text) != true)
+			result = mount_fuse_fs(dest_dir);
+			
+		if(result == true)
 			chroot(dest_dir->text);
-		}
 	}
 
-	free(check_dir);
-	free(mount_command);
+	if(check_dir != NULL)
+		free(check_dir);
 
 	return result;
 }
 
-//TODO: Refacor
 bool test_and_mount_chrootfs(char *username)
 {
 	bool result;
-
 	text* dest_dir;
 
 	dest_dir = new_text();
@@ -177,7 +194,8 @@ bool test_and_mount_chrootfs(char *username)
 		}
 	}
 	
-	free(dest_dir);
+	if(dest_dir != NULL)
+		free(dest_dir);
 
 	return result;
 }

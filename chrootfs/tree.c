@@ -139,7 +139,7 @@ bool allocate_new_tree_slots(node* parent, size_t slots)
 	return true;
 }
 
-void print_tree(node* tree, char *parent) 
+void print_tree(const node* tree, const char *parent) 
 {
 	size_t i;
 	char buffer[1024];
@@ -278,13 +278,13 @@ node* find_tree_element(node* tree, const char* name)
 	return treeptr;
 }
 
-void get_full_name_for_node(node* mynode, char* result, size_t result_size)
+void get_full_name_for_node(const node* mynode, char* result, const size_t result_size)
 {
 	char* name;
 	size_t i;
 	size_t new_size;
 
-	node* parent = mynode;
+	const node* parent = mynode;
 	memset(result, 0, result_size * sizeof(char));
 
 	if(is_tree_root(mynode)) {
@@ -345,7 +345,7 @@ void remove_last_element_from_pathname(char *path)
 	}
 }
 
-bool is_tree_root(node *mynode)
+bool is_tree_root(const node *mynode)
 {
 	return mynode->parent == mynode;
 }

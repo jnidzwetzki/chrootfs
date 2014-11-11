@@ -6,9 +6,9 @@ LBITS := $(shell getconf LONG_BIT)
 
 INSTALLDIR := $(DESTDIR)/lib/security
 
-all: chrootfs_pam.so
+all: pam_chrootfs.so
 
-chrootfs_pam.so: pam_chrootfs.c 
+pam_chrootfs.so: pam_chrootfs.c 
 	$(CC) $(CFLAGS) -o pam_chrootfs.so pam_chrootfs.c 
 
 clean:

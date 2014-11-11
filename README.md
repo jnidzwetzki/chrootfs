@@ -41,6 +41,7 @@ hide {
 
 show_empty_dir {
         /opt
+        /var/chrootfs
 }
 
 show_only_user {
@@ -57,6 +58,7 @@ show_only_user {
 ## Example 
 Whihout chrootfs:
 ```
+$ ssh test@192.168.1.15
 test@tusnelda:~$ ls -ld /etc/squid
 drwxr-xr-x 2 root root 4096 Jun 12  2013 /etc/squid
 test@tusnelda:~$ ls -l /etc/squid
@@ -79,6 +81,7 @@ test@tusnelda:~$
 
 With chrootfs:
 ```
+$ ssh test@192.168.1.15
 test@tusnelda:~$ ls -ld /etc/squid
 ls: cannot access /etc/squid: No such file or directory
 test@tusnelda:~$ ls -l /etc/squid

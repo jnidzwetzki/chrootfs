@@ -220,6 +220,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 {
 	bool result;	
 	text* check_dir;
+	int res;
 	
 	check_dir = new_text();
 	result = true;
@@ -234,9 +235,13 @@ bool mount_chrootfs(text* dest_dir, char* username)
 
 		if(check_dir_exists(check_dir->text) != true)
 			result = mount_fuse_fs(dest_dir, username);
+
+		if(result == true) {
+			res = chroot(dest_dir->text);
 			
-		if(result == true)
-			chroot(dest_dir->text);
+			if(res != 0)
+				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to chroot in line __LINE__");
+		}
 	}
 
 	free_text(check_dir);

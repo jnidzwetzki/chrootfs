@@ -7,9 +7,9 @@ use this filesystem for providing chroot environments to users
 without copying any libraries or binaries. 
 
 ## Installation
-You can install chrootfs by running "make" and "make install". Finally, you need to enable the option *user_allow_other* in your FUSE configuration (*/etc/fuse.conf*). 
+You can install chrootfs by running `make` and `make install`. Finally, you need to enable the option `user_allow_other` in your FUSE configuration (`/etc/fuse.conf`). 
 
-On Debian based systems you can build a .deb package by running *dpkg-buildpackage -rfakeroot*.
+On Debian based systems you can build a .deb package by running `dpkg-buildpackage -rfakeroot`.
 
 ### Configuring PAM
 Add the following lines to all of the services they should use chrootfs (e.g. /etc/pam.d/{sshd, su, login, cron}).
@@ -71,7 +71,7 @@ total 0
 test@tusnelda:~$
 ```
 ## Configuration
-The configuration file of chrootfs is */etc/chrootfs.conf*
+The configuration file of chrootfs is `/etc/chrootfs.conf`
 ```
 // Sample configuration for chrootfs
 
@@ -89,3 +89,10 @@ show_only_user {
         /home
 }
 ```
+
+| Section            | Meaning       |
+| -------------------| ------------- |
+| `hide`             | The specifieded files or directories are invisible in chrootfs.  |
+| `show_empty_dir`   | These directories are visible, but empty.  |
+| `show_only_user`   | These directories are visible, but they contain only entries with the same name as the user  (e.g. `/home/foo` for user `foo`).|
+

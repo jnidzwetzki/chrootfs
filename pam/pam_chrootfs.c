@@ -31,6 +31,7 @@
 
 #define PAM_CHROOT_ERROR -1
 
+#define FUSE_DEV "/dev/fuse"
 #define CHROOTFS_DIR "/var/chrootfs"
 #define CHROOTFS_BIN "/usr/bin/chrootfs"
 
@@ -156,6 +157,21 @@ bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
 	return true;
 }
 
+gid_t get_gid_from_file(const char* file)
+{
+	int res;
+	struct stat attribute;
+	
+	res = stat(file, &attribute);
+
+	if(res != 0) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute stat in line __LINE__");
+		return -1;
+	}
+
+	return attribute.st_gid;
+}
+
 bool execute_as_user(text* command, uid_t uid, gid_t gid)
 {
 	bool result;
@@ -177,11 +193,16 @@ bool execute_as_user(text* command, uid_t uid, gid_t gid)
 	} else {
 		// Child
 		setgid(gid);
+		setegid(gid);
 		setuid(uid);
+		seteuid(uid);
 
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s as pid %d", command->text, getpid());
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", command->text, uid, gid);
 		child_result = __WEXITSTATUS(system(command->text));
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: result id %d", child_result);
+		
+		if(child_result != 0)
+			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: return code is %d", child_result);
+		
 		exit(child_result);
 	}
 
@@ -206,8 +227,10 @@ bool mount_fuse_fs(text* dest_dir, char* username)
 		result = get_uid_and_gid_for_user(username, &uid, &gid);
 
 		if(result != false) {
-			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", mount_command->text, uid, gid);
-			result = execute_as_user(mount_command, uid, gid);
+			gid = get_gid_from_file(FUSE_DEV);
+
+			if(gid != -1)
+				result = execute_as_user(mount_command, uid, gid);
 		}
 	}
 

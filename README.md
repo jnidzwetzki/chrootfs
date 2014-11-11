@@ -40,7 +40,7 @@ hide {
 }
 
 show_empty_dir {
-	/opt
+        /opt
 }
 
 show_only_user {

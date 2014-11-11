@@ -21,7 +21,7 @@
 struct node;
 
 // Function pointers
-typedef bool (*fsfilterfunc)(const char* name, struct node* treenode, uid_t uid, gid_t gid);
+typedef bool (*fsfilterfunc)(const char* name, const struct node* treenode, const uid_t uid, const gid_t gid);
 
 // Types
 typedef struct fsfilter {
@@ -31,8 +31,8 @@ typedef struct fsfilter {
 } fsfilter;
 
 // Prototypes
-bool hide_file_func(const char* name, struct node* treenode, uid_t uid, gid_t gid);
-bool show_only_user_func(const char* name, struct node* treenode, uid_t uid, gid_t gid);
+bool hide_file_func(const char* name, const struct node* treenode, const uid_t uid, const gid_t gid);
+bool show_only_user_func(const char* name, const struct node* treenode, const uid_t uid, const gid_t gid);
 
 // Extern structures
 extern fsfilter hide_file;

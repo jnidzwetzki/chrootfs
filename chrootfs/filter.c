@@ -22,12 +22,12 @@
 
 #include "tree.h"
 
-bool hide_file_func(const char* name, node* treenode, uid_t uid, gid_t gid)
+bool hide_file_func(const char* name, const node* treenode, const uid_t uid, const gid_t gid)
 {
 	return false;
 }
 
-bool show_only_user_func(const char* name, node* treenode, uid_t uid, gid_t gid)
+bool show_only_user_func(const char* name, const node* treenode, const uid_t uid, const gid_t gid)
 {
 	
 	printf("Filtering %s on node %s\n", name, treenode->name);

@@ -367,6 +367,18 @@ static int chrootfs_statfs(const char *path, struct statvfs *stbuf)
 	return 0;
 }
 
+static int chrootfs_mknod(const char *path, mode_t mode, dev_t dev)
+{
+	int res;
+
+	res = mknod(path, mode, dev);
+
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -478,6 +490,7 @@ static struct fuse_operations chrootfs_oper = {
 	.truncate    = chrootfs_truncate,
 	.write       = chrootfs_write,
 	.statfs      = chrootfs_statfs,
+        .mknod       = chrootfs_mknod,
 
 #ifdef HAVE_SETXATTR
         .getxattr    = chrootfs_getxattr,

@@ -30,12 +30,9 @@ typedef struct fsfilter {
 	bool execute_on_child;
 } fsfilter;
 
-// Prototypes
-bool hide_file_func(const char* name, const struct node* treenode, const uid_t uid, const gid_t gid);
-bool show_only_user_func(const char* name, const struct node* treenode, const uid_t uid, const gid_t gid);
-
 // Extern structures
 extern fsfilter hide_file;
+extern fsfilter show_empty_dir;
 extern fsfilter show_only_user;
 
 #endif

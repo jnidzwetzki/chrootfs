@@ -9,6 +9,7 @@
 
 %token T_HIDE
 %token T_SHOW_ONLY_USER
+%token T_SHOW_EMPTY_DIR
 %token T_OB
 %token T_CB
 %token T_PATH
@@ -33,6 +34,7 @@ SECTIONS:
 
 SECTION:
 	T_HIDE BLOCK               { parser_handle_paths($2.head, &hide_file); }
+	| T_SHOW_EMPTY_DIR BLOCK   { parser_handle_paths($2.head, &show_empty_dir); }
 	| T_SHOW_ONLY_USER BLOCK   { parser_handle_paths($2.head, &show_only_user); }
 	;
 

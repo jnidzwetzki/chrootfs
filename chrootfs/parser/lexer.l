@@ -17,6 +17,7 @@ int gLineNumber = 1;
 [ ]
 hide                    { return T_HIDE; }
 show_only_user          { return T_SHOW_ONLY_USER; }
+show_empty_dir          { return T_SHOW_EMPTY_DIR; }
 \{                      { return T_OB; }
 \}                      { return T_CB; }
 .                       { return yytext[0]; }

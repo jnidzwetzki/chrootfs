@@ -53,8 +53,15 @@ fsfilter hide_file = {
 	.execute_on_child = true,
 };
 
+fsfilter show_empty_dir = {
+	.func = hide_file_func,
+	.execute_on_parent = true,
+	.execute_on_child = false,
+};
+
 fsfilter show_only_user = {
 	.func = show_only_user_func,
 	.execute_on_parent = true,
 	.execute_on_child = false,
 };
+

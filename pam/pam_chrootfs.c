@@ -43,6 +43,9 @@ typedef struct text {
 	size_t size;
 } text;
 
+// Typedefs
+typedef void (*readcommand)(text* mount_command, text* dest_dir);
+
 text* new_text() 
 {
 	text* result = (text*) malloc(sizeof(text));
@@ -116,12 +119,40 @@ void get_mount_path(text* dest_dir, char* username)
 	strncat(dest_dir->text, username, get_free_space(dest_dir));
 }
 
-void get_mount_command(text* mount_command, text* dest_dir)
+void get_fuse_mount_command(text* mount_command, text* dest_dir)
 {
 	strncpy(mount_command->text, CHROOTFS_BIN, get_free_space(mount_command));
 	strncat(mount_command->text, " ", get_free_space(mount_command));
 	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
 	strncat(mount_command->text, " -o allow_root", get_free_space(mount_command));
+}
+
+void get_dev_mount_command(text* mount_command, text* dest_dir)
+{
+	strncpy(mount_command->text, "mount --bind /dev ", get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
+	strncat(mount_command->text, "/dev", get_free_space(mount_command));
+}
+
+void get_dev_pts_mount_command(text* mount_command, text* dest_dir)
+{
+	strncpy(mount_command->text, "mount devpts -t devpts ", get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
+	strncat(mount_command->text, "/dev/pts", get_free_space(mount_command));
+}
+
+void get_sys_mount_command(text* mount_command, text* dest_dir)
+{
+	strncpy(mount_command->text, "mount --bind /sys ", get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
+	strncat(mount_command->text, "/sys", get_free_space(mount_command));
+}
+
+void get_proc_mount_command(text* mount_command, text* dest_dir)
+{
+	strncpy(mount_command->text, "mount --bind /proc ", get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
+	strncat(mount_command->text, "/proc", get_free_space(mount_command));
 }
 
 bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
@@ -192,10 +223,13 @@ bool execute_as_user(text* command, uid_t uid, gid_t gid)
 		waitpid(pid, &child_result, 0);	
 	} else {
 		// Child
-		setgid(gid);
-		setegid(gid);
-		setuid(uid);
-		seteuid(uid);
+		
+		if(uid != 0 || gid != 0) {
+			setgid(gid);
+			setegid(gid);
+			setuid(uid);
+			seteuid(uid);
+		}
 
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", command->text, uid, gid);
 		child_result = __WEXITSTATUS(system(command->text));
@@ -209,32 +243,64 @@ bool execute_as_user(text* command, uid_t uid, gid_t gid)
 	return result;
 }
 
-bool mount_fuse_fs(text* dest_dir, char* username)
+bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t gid)
 {
 	bool result;
-	text* mount_command;
-	uid_t uid;
-	gid_t gid;
-
-	mount_command = new_text();
+	text* command;
+	
+	command = new_text();
 	result = true;
 
-	if(mount_command == NULL) {
+	if(command == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line __LINE__");
 		result = false;
 	} else {
-		get_mount_command(mount_command, dest_dir);
-		result = get_uid_and_gid_for_user(username, &uid, &gid);
-
-		if(result != false) {
-			gid = get_gid_from_file(FUSE_DEV);
-
-			if(gid != -1)
-				result = execute_as_user(mount_command, uid, gid);
-		}
+		readcommand(command, dest_dir);
+		result = execute_as_user(command, uid, gid);
 	}
 
-	free_text(mount_command);
+	free_text(command);
+
+	return result;
+}
+
+bool mount_fuse_fs(text* dest_dir, char* username)
+{
+	uid_t uid;
+	gid_t gid;
+	bool result;
+
+	result = get_uid_and_gid_for_user(username, &uid, &gid);
+	gid = get_gid_from_file(FUSE_DEV);
+
+	if(result != false && gid != -1) {
+
+		// Mount chrootfs
+		result = execute_command(dest_dir, get_fuse_mount_command, uid, gid);
+		if(result == false)
+			return false;
+
+		// Mount /dev
+		result = execute_command(dest_dir, get_dev_mount_command, 0, 0);
+		if(result == false)
+			return false;
+
+		// Mount /dev/pts
+		result = execute_command(dest_dir, get_dev_pts_mount_command, 0, 0);
+		if(result == false)
+			return false;
+
+		// Mount /sys
+		result = execute_command(dest_dir, get_sys_mount_command, 0, 0);
+		if(result == false)
+			return false;
+
+		// Mount /proc
+		result = execute_command(dest_dir, get_proc_mount_command, 0, 0);
+		if(result == false)
+			return false;
+
+	}
 
 	return result;
 }

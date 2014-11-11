@@ -19,7 +19,7 @@
 #define __CHROOTFS_CONFIGURATION_H
 
 // Defines
-#define CONFIGFILE "/tmp/chrootfs.conf"
+#define CONFIGFILE "/etc/chrootfs.conf"
 
 // Prototypes
 node* get_configuration(); 

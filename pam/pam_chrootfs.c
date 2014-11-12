@@ -25,6 +25,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <security/pam_appl.h>
 
 #define PAM_SM_SESSION
@@ -110,6 +111,50 @@ bool check_dir_exists(char *dirname)
 			return true;
 
 	return false;
+}
+
+int aquire_lock(text* filename)
+{
+	int fd;
+	int res;
+
+	fd = open(filename->text, O_CREAT);
+
+	if(fd == -1) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to open file %s in line %d", filename->text, __LINE__);
+		return -1;
+	}
+
+	res = flock(fd, LOCK_EX);
+
+	if(res == -1) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to lock file %s in line %d", filename->text, __LINE__);
+		return -1;
+	}
+
+	return fd;
+}
+
+void release_lock(int fd)
+{
+	int res;
+
+	if(fd > 0) {
+		res = flock(fd, LOCK_UN);
+		close(fd);
+	
+		if(res == -1)
+			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to unlock lock in line %d", __LINE__);
+
+	}
+}
+
+void get_lockfile(text* lockfile, char* username)
+{
+	strncpy(lockfile->text, CHROOTFS_DIR, get_free_space(lockfile));
+	strncat(lockfile->text, "/.", get_free_space(lockfile));
+	strncat(lockfile->text, username, get_free_space(lockfile));
+	strncat(lockfile->text, ".lock", get_free_space(lockfile));
 }
 
 void get_mount_path(text* dest_dir, char* username)
@@ -345,6 +390,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 	int res;
 	
 	check_dir = new_text();
+
 	result = true;
 	
 	if(check_dir == NULL) {
@@ -360,10 +406,11 @@ bool mount_chrootfs(text* dest_dir, char* username)
 
 		if(result == true) {
 			res = chroot(dest_dir->text);
-			
+				
 			if(res != 0)
 				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to chroot in line %d", __LINE__);
 		}
+
 	}
 
 	free_text(check_dir);
@@ -375,24 +422,40 @@ bool test_and_mount_chrootfs(char *username)
 {
 	bool result;
 	text* dest_dir;
+	text* lockfile;
+	int lockfd;
 
 	dest_dir = new_text();
+	lockfile = new_text();
+	
 	result = true;
 	
-	if(dest_dir == NULL) {
+	if(dest_dir == NULL || lockfile == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
 	} else {
 		get_mount_path(dest_dir, username);
+		
+		// Aquire lock
+		get_lockfile(lockfile, username);
+		lockfd = aquire_lock(lockfile);
 
-		if(check_dir_exists(dest_dir->text) == false) {
-			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: dir %s does not exist, no chroot required", dest_dir->text);
+		if(lockfd == -1) {
+			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to aquire lock in line %d", __LINE__);
 		} else {
-			result = mount_chrootfs(dest_dir, username);
+			if(check_dir_exists(dest_dir->text) == false) {
+				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: dir %s does not exist, no chroot required", dest_dir->text);
+			} else {
+				result = mount_chrootfs(dest_dir, username);
+			}
 		}
+		
+		// Release lock
+		release_lock(lockfd);
 	}
 	
 	free_text(dest_dir);
+	free_text(lockfile);
 
 	return result;
 }

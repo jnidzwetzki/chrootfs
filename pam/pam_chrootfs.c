@@ -167,7 +167,7 @@ bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
 	char* buffer = (char*) malloc(buflen * sizeof(char));
 
 	if(buffer == NULL) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		return false;
 	}
 
@@ -196,7 +196,7 @@ gid_t get_gid_from_file(const char* file)
 	res = stat(file, &attribute);
 
 	if(res != 0) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute stat in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute stat in line %d", __LINE__);
 		return -1;
 	}
 
@@ -210,27 +210,27 @@ bool set_uid_and_gid(uid_t uid, gid_t gid)
 	res = setgid(gid);
 
 	if(res != 0) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgid in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgid in line %d", __LINE__);
 		return false;
 	}
 	
 	res = setegid(gid);
 	
 	if(res != 0) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setegid in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setegid in line %d", __LINE__);
 		return false;
 	}
 	res = setuid(uid);
 	
 	if(res != 0) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setuid in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setuid in line %d", __LINE__);
 		return false;
 	}
 	
 	res = seteuid(uid);
 	
 	if(res != 0) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute seteuid in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute seteuid in line %d", __LINE__);
 		return false;
 	}
 
@@ -248,7 +248,7 @@ bool execute_as_user(text* command, uid_t uid, gid_t gid)
 	pid = fork();
 
 	if(pid == -1) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to fork in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to fork in line %d", __LINE__);
 		return false;
 	}
 
@@ -285,7 +285,7 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 	result = true;
 
 	if(command == NULL) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
 	} else {
 		readcommand(command, dest_dir);
@@ -348,7 +348,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 	result = true;
 	
 	if(check_dir == NULL) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
 	} else {
 		// Build check dir
@@ -362,7 +362,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 			res = chroot(dest_dir->text);
 			
 			if(res != 0)
-				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to chroot in line __LINE__");
+				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to chroot in line %d", __LINE__);
 		}
 	}
 
@@ -380,7 +380,7 @@ bool test_and_mount_chrootfs(char *username)
 	result = true;
 	
 	if(dest_dir == NULL) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line __LINE__");
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
 	} else {
 		get_mount_path(dest_dir, username);

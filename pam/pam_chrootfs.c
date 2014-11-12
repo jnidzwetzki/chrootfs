@@ -203,6 +203,40 @@ gid_t get_gid_from_file(const char* file)
 	return attribute.st_gid;
 }
 
+bool set_uid_and_gid(uid_t uid, gid_t gid)
+{
+	int res;
+	
+	res = setgid(gid);
+
+	if(res != 0) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgid in line __LINE__");
+		return false;
+	}
+	
+	res = setegid(gid);
+	
+	if(res != 0) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setegid in line __LINE__");
+		return false;
+	}
+	res = setuid(uid);
+	
+	if(res != 0) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setuid in line __LINE__");
+		return false;
+	}
+	
+	res = seteuid(uid);
+	
+	if(res != 0) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute seteuid in line __LINE__");
+		return false;
+	}
+
+	return true;
+}
+
 bool execute_as_user(text* command, uid_t uid, gid_t gid)
 {
 	bool result;
@@ -224,12 +258,11 @@ bool execute_as_user(text* command, uid_t uid, gid_t gid)
 	} else {
 		// Child
 		
-		if(uid != 0 || gid != 0) {
-			setgid(gid);
-			setegid(gid);
-			setuid(uid);
-			seteuid(uid);
-		}
+		if(uid != 0 || gid != 0)
+			result = set_uid_and_gid(uid, gid);
+		
+		if(result == false)
+			return false;
 
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", command->text, uid, gid);
 		child_result = __WEXITSTATUS(system(command->text));
@@ -382,7 +415,7 @@ int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **ar
 	}
 
 	if(test_and_mount_chrootfs(username) != true) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to mount chrootfs for user %s", CHROOTFS_DIR);
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to mount chrootfs for user %s", username);
 		return PAM_CHROOT_ERROR;
 	}
 

@@ -17,7 +17,7 @@
 
 #include "libchrootfs.h"
 
-text* new_text() 
+text* text_new() 
 {
 	text* result = (text*) malloc(sizeof(text));
 
@@ -39,7 +39,7 @@ text* new_text()
 	return result;
 }
 
-size_t get_free_space(text* mytext)
+size_t text_get_free_space(text* mytext)
 {
 	if(mytext == NULL)
 		return -1;
@@ -47,7 +47,7 @@ size_t get_free_space(text* mytext)
 	return mytext->size - strlen(mytext->text) - 1;
 }
 
-void free_text(text* mytext)
+void text_free(text* mytext)
 {
 	if(mytext == NULL)
 		return;

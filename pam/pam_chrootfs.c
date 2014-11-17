@@ -104,53 +104,53 @@ void release_lock(int fd)
 
 void get_lockfile(text* lockfile, char* username)
 {
-	strncpy(lockfile->text, CHROOTFS_DIR, get_free_space(lockfile));
-	strncat(lockfile->text, "/.", get_free_space(lockfile));
-	strncat(lockfile->text, username, get_free_space(lockfile));
-	strncat(lockfile->text, ".lock", get_free_space(lockfile));
+	strncpy(lockfile->text, CHROOTFS_DIR, text_get_free_space(lockfile));
+	strncat(lockfile->text, "/.", text_get_free_space(lockfile));
+	strncat(lockfile->text, username, text_get_free_space(lockfile));
+	strncat(lockfile->text, ".lock", text_get_free_space(lockfile));
 }
 
 void get_mount_path(text* dest_dir, char* username)
 {
-	strncpy(dest_dir->text, CHROOTFS_DIR, get_free_space(dest_dir));
-	strncat(dest_dir->text, "/", get_free_space(dest_dir));
-	strncat(dest_dir->text, username, get_free_space(dest_dir));
+	strncpy(dest_dir->text, CHROOTFS_DIR, text_get_free_space(dest_dir));
+	strncat(dest_dir->text, "/", text_get_free_space(dest_dir));
+	strncat(dest_dir->text, username, text_get_free_space(dest_dir));
 }
 
 void get_fuse_mount_command(text* mount_command, text* dest_dir)
 {
-	strncpy(mount_command->text, CHROOTFS_BIN, get_free_space(mount_command));
-	strncat(mount_command->text, " ", get_free_space(mount_command));
-	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
-	strncat(mount_command->text, " -o allow_root", get_free_space(mount_command));
+	strncpy(mount_command->text, CHROOTFS_BIN, text_get_free_space(mount_command));
+	strncat(mount_command->text, " ", text_get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, text_get_free_space(mount_command));
+	strncat(mount_command->text, " -o allow_root", text_get_free_space(mount_command));
 }
 
 void get_dev_mount_command(text* mount_command, text* dest_dir)
 {
-	strncpy(mount_command->text, "mount --bind /dev ", get_free_space(mount_command));
-	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
-	strncat(mount_command->text, "/dev", get_free_space(mount_command));
+	strncpy(mount_command->text, "mount --bind /dev ", text_get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, text_get_free_space(mount_command));
+	strncat(mount_command->text, "/dev", text_get_free_space(mount_command));
 }
 
 void get_dev_pts_mount_command(text* mount_command, text* dest_dir)
 {
-	strncpy(mount_command->text, "mount devpts -t devpts ", get_free_space(mount_command));
-	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
-	strncat(mount_command->text, "/dev/pts", get_free_space(mount_command));
+	strncpy(mount_command->text, "mount devpts -t devpts ", text_get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, text_get_free_space(mount_command));
+	strncat(mount_command->text, "/dev/pts", text_get_free_space(mount_command));
 }
 
 void get_sys_mount_command(text* mount_command, text* dest_dir)
 {
-	strncpy(mount_command->text, "mount --bind /sys ", get_free_space(mount_command));
-	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
-	strncat(mount_command->text, "/sys", get_free_space(mount_command));
+	strncpy(mount_command->text, "mount --bind /sys ", text_get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, text_get_free_space(mount_command));
+	strncat(mount_command->text, "/sys", text_get_free_space(mount_command));
 }
 
 void get_proc_mount_command(text* mount_command, text* dest_dir)
 {
-	strncpy(mount_command->text, "mount --bind /proc ", get_free_space(mount_command));
-	strncat(mount_command->text, dest_dir->text, get_free_space(mount_command));
-	strncat(mount_command->text, "/proc", get_free_space(mount_command));
+	strncpy(mount_command->text, "mount --bind /proc ", text_get_free_space(mount_command));
+	strncat(mount_command->text, dest_dir->text, text_get_free_space(mount_command));
+	strncat(mount_command->text, "/proc", text_get_free_space(mount_command));
 }
 
 bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
@@ -279,7 +279,7 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 	bool result;
 	text* command;
 	
-	command = new_text();
+	command = text_new();
 	result = true;
 
 	if(command == NULL) {
@@ -290,7 +290,7 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 		result = execute_as_user(command, uid, gid);
 	}
 
-	free_text(command);
+	text_free(command);
 
 	return result;
 }
@@ -342,7 +342,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 	text* check_dir;
 	int res;
 	
-	check_dir = new_text();
+	check_dir = text_new();
 
 	result = true;
 	
@@ -351,8 +351,8 @@ bool mount_chrootfs(text* dest_dir, char* username)
 		result = false;
 	} else {
 		// Build check dir
-		strncpy(check_dir->text, dest_dir->text, get_free_space(check_dir));
-		strncat(check_dir->text, "/bin", get_free_space(check_dir) - 4);
+		strncpy(check_dir->text, dest_dir->text, text_get_free_space(check_dir));
+		strncat(check_dir->text, "/bin", text_get_free_space(check_dir) - 4);
 
 		if(check_dir_exists(check_dir->text) != true)
 			result = mount_fuse_fs(dest_dir, username);
@@ -366,7 +366,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 
 	}
 
-	free_text(check_dir);
+	text_free(check_dir);
 
 	return result;
 }
@@ -378,8 +378,8 @@ bool test_and_mount_chrootfs(char *username)
 	text* lockfile;
 	int lockfd;
 
-	dest_dir = new_text();
-	lockfile = new_text();
+	dest_dir = text_new();
+	lockfile = text_new();
 	
 	result = true;
 	
@@ -407,8 +407,8 @@ bool test_and_mount_chrootfs(char *username)
 		release_lock(lockfd);
 	}
 	
-	free_text(dest_dir);
-	free_text(lockfile);
+	text_free(dest_dir);
+	text_free(lockfile);
 
 	return result;
 }

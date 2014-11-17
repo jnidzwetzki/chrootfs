@@ -29,7 +29,7 @@ typedef struct text {
 } text;
 
 // Prototypes
-text* new_text();
-size_t get_free_space(text* mytext);
-void free_text(text* mytext);
+text* text_new();
+size_t text_get_free_space(text* mytext);
+void text_free(text* mytext);
 

@@ -8,7 +8,7 @@ all:
 	$(MAKE) -C pam all
 
 install: all
-	$(MAKE) -c lib all
+	$(MAKE) -C lib all
 	$(MAKE) -C chrootfs install
 	$(MAKE) -C pam install
 

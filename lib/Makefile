@@ -19,7 +19,7 @@ $(NAME_STATIC): libchrootfs.c
 clean:
 	rm -f $(NAME)
 	rm -f $(NAME_STATIC)
-	rm libchrootfs.o
+	rm -f libchrootfs.o
 
 
 install: libchrootfs.so

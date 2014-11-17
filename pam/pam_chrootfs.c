@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <security/pam_appl.h>
+#include <libchrootfs.h>
 
 #define PAM_SM_SESSION
 
@@ -36,57 +37,9 @@
 #define CHROOTFS_DIR "/var/chrootfs"
 #define CHROOTFS_BIN "/usr/bin/chrootfs"
 
-#define DEFAULT_TEXT_LENGTH 1024
-
-// Structs
-typedef struct text {
-	char *text;
-	size_t size;
-} text;
-
 // Typedefs
 typedef void (*readcommand)(text* mount_command, text* dest_dir);
 
-text* new_text() 
-{
-	text* result = (text*) malloc(sizeof(text));
-
-	// Out of memory
-	if(result == NULL)
-		return NULL;
-
-	memset(result, 0, sizeof(text));
-
-	result->size = DEFAULT_TEXT_LENGTH;
-	result->text = (char*) malloc(DEFAULT_TEXT_LENGTH * sizeof(char));
-
-	// Out of memory
-	if(result->text == NULL) {
-		free(result);
-		return NULL;
-	}
-
-	return result;
-}
-
-size_t get_free_space(text* mytext)
-{
-	if(mytext == NULL)
-		return -1;
-
-	return mytext->size - strlen(mytext->text) - 1;
-}
-
-void free_text(text* mytext)
-{
-	if(mytext == NULL)
-		return;
-	
-	if(mytext->text != NULL)
-		free(mytext->text);
-
-	free(mytext);
-}
 
 void chrootfs_pam_log(int err, const char *format, ...)
 {

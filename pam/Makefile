@@ -1,6 +1,8 @@
 .PHONY: all clean install uninstall 
 
 CFLAGS := -fPIC -DPIC -shared -rdynamic 
+CFLAGS += -I../lib
+CFLAGS += -L ../lib -lchrootfs
 
 LBITS := $(shell getconf LONG_BIT)
 

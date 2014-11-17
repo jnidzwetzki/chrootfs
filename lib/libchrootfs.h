@@ -15,6 +15,9 @@
 
 */
 
+#ifndef __CHROOTFS_H__
+#define __CHROOTFS_H__
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -33,3 +36,4 @@ text* text_new();
 size_t text_get_free_space(text* mytext);
 void text_free(text* mytext);
 
+#endif

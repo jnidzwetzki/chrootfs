@@ -2,7 +2,7 @@
 
 CFLAGS := -fPIC -DPIC -shared -rdynamic 
 CFLAGS += -I../lib
-CFLAGS += -L ../lib -lchrootfs
+CFLAGS += -Wl,-whole-archive ../lib/libchrootfs.a -Wl,-no-whole-archive
 
 LBITS := $(shell getconf LONG_BIT)
 

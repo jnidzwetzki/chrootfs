@@ -142,6 +142,19 @@ void get_mount_path(text* dest_dir, char* username)
 	strncat(dest_dir->text, username, text_get_free_space(dest_dir));
 }
 
+void get_is_mounted_test_path(text* check_dir, text* dest_dir)
+{
+	strncpy(check_dir->text, dest_dir->text, text_get_free_space(check_dir));
+	strncat(check_dir->text, "/bin", text_get_free_space(check_dir));
+}
+
+void get_umount_pending_test_path(text* check_dir, char* username)
+{
+	strncpy(check_dir->text, CHROOTFS_DIR, text_get_free_space(check_dir));
+	strncat(check_dir->text, "/.umount_", text_get_free_space(check_dir));
+	strncat(check_dir->text, username, text_get_free_space(check_dir));
+}
+
 void get_fuse_mount_command(text* mount_command, text* dest_dir)
 {
 	strncpy(mount_command->text, CHROOTFS_BIN, text_get_free_space(mount_command));
@@ -363,23 +376,30 @@ bool mount_fuse_fs(text* dest_dir, char* username)
 
 bool mount_chrootfs(text* dest_dir, char* username)
 {
-	bool result;	
+	bool result;
+	bool mount_dir_exists;
+	bool umount_pending;
+
 	text* check_dir;
+	text* umount_file;
 	int res;
 	
 	check_dir = text_new();
+	umount_file = text_new();
 
 	result = true;
 	
-	if(check_dir == NULL) {
+	if(check_dir == NULL || umount_file == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
 	} else {
-		// Build check dir
-		strncpy(check_dir->text, dest_dir->text, text_get_free_space(check_dir));
-		strncat(check_dir->text, "/bin", text_get_free_space(check_dir) - 4);
+		get_is_mounted_test_path(check_dir, dest_dir);
+		get_umount_pending_test_path(umount_file, username);
 
-		if(dir_or_file_exists(check_dir->text) != true)
+		mount_dir_exists = dir_or_file_exists(check_dir->text);
+		umount_pending = dir_or_file_exists(umount_file->text); 
+		
+		if(mount_dir_exists == true && umount_pending == false)	
 			result = mount_fuse_fs(dest_dir, username);
 
 		if(result == true) {
@@ -392,6 +412,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 	}
 
 	text_free(check_dir);
+	text_free(umount_file);
 
 	return result;
 }

@@ -58,6 +58,8 @@ int aquire_lock(text* filename);
 void release_lock(int fd);
 void get_lockfile(text* lockfile, char* username);
 void get_mount_path(text* dest_dir, char* username);
+void get_is_mounted_test_path(text* check_dir, text* dest_dir);
+void get_umount_pending_test_path(text* check_dir, char* username);
 void get_fuse_mount_command(text* mount_command, text* dest_dir);
 void get_dev_mount_command(text* mount_command, text* dest_dir);
 void get_dev_pts_mount_command(text* mount_command, text* dest_dir);

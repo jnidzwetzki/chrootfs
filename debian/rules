@@ -41,10 +41,10 @@ binary-indep: build install
 
 	dh_link
 	dh_strip
+	dh_installman
 	dh_compress
 	dh_fixperms
 	dh_installdeb
-	dh_installman
 	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums

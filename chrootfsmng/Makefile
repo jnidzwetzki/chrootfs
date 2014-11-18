@@ -12,7 +12,7 @@ chrootfsmng.1: chrootfsmng.man
 
 clean:
 	rm -f chrootfsmng
-	rm chrootfsmng.1
+	rm -f chrootfsmng.1
 
 install: all 
 	cp chrootfsmng $(DESTDIR)/usr/bin 

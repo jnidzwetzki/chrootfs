@@ -17,9 +17,9 @@ clean:
 	rm -f pam_chrootfs.so
 
 install: pam_chrootfs.so
-	mkdir -p $(INSTALLDIR)
-	cp pam_chrootfs.so $(INSTALLDIR)
-	mkdir -p $(DESTDIR)/var/chrootfs
+	install -d -m 0755 $(DESTDIR)/var/chrootfs
+	install -d -m 0755 $(INSTALLDIR)
+	install -o root -g root -m 0644 pam_chrootfs.so $(INSTALLDIR)/pam_chrootfs.so
 
 uninstall:
 	rm -f $(INSTALLDIR)/pam_chrootfs.so

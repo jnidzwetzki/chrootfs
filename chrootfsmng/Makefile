@@ -11,7 +11,7 @@ clean:
 	rm -f chrootfsmng
 
 install: all 
-	cp chrootfsmng $(DESTDIR)/usr/bin 
+	install -o root -g root -m 0755 chrootfsmng $(DESTDIR)/usr/bin/chrootfsmng 
 
 uninstall:
 	rm -f $(DESTDIR)/usr/bin/libchrootfs.so

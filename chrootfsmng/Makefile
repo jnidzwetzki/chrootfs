@@ -10,7 +10,7 @@ chrootfsmng: chrootfsmng.c
 clean:
 	rm -f chrootfsmng
 
-install: libchrootfs.so
+install: chrootfsmng
 	cp chrootfsmng /usr/bin 
 
 uninstall:

@@ -36,6 +36,8 @@ text* text_new()
 		return NULL;
 	}
 
+	text_clear(result);
+
 	return result;
 }
 
@@ -45,6 +47,12 @@ size_t text_get_free_space(text* mytext)
 		return -1;
 
 	return mytext->size - strlen(mytext->text) - 1;
+}
+
+void text_clear(text* mytext)
+{
+	if(mytext != NULL)
+		memset(mytext->text, 0, mytext->size * sizeof(char));
 }
 
 void text_free(text* mytext)
@@ -69,15 +77,15 @@ void chrootfs_pam_log(int err, const char *format, ...)
 	closelog();
 }
 
-bool check_dir_exists(char *dirname)
+bool dir_or_file_exists(char *name)
 {
 	int err;
 	struct stat s;
 
-	err = stat(dirname, &s);
+	err = stat(name, &s);
 
 	if(err != -1)
-		if(S_ISDIR(s.st_mode))
+		if(S_ISDIR(s.st_mode) || S_ISREG(s.st_mode))
 			return true;
 
 	return false;
@@ -371,7 +379,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 		strncpy(check_dir->text, dest_dir->text, text_get_free_space(check_dir));
 		strncat(check_dir->text, "/bin", text_get_free_space(check_dir) - 4);
 
-		if(check_dir_exists(check_dir->text) != true)
+		if(dir_or_file_exists(check_dir->text) != true)
 			result = mount_fuse_fs(dest_dir, username);
 
 		if(result == true) {
@@ -413,7 +421,7 @@ bool test_and_mount_chrootfs(char *username)
 		if(lockfd == -1) {
 			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to aquire lock in line %d", __LINE__);
 		} else {
-			if(check_dir_exists(dest_dir->text) == false) {
+			if(dir_or_file_exists(dest_dir->text) == false) {
 				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: dir %s does not exist, no chroot required", dest_dir->text);
 			} else {
 				result = mount_chrootfs(dest_dir, username);

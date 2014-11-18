@@ -50,9 +50,10 @@ typedef void (*readcommand)(text* mount_command, text* dest_dir);
 // Prototypes
 text* text_new();
 size_t text_get_free_space(text* mytext);
+void text_clear(text* mytext);
 void text_free(text* mytext);
 void chrootfs_pam_log(int err, const char *format, ...);
-bool check_dir_exists(char *dirname);
+bool dir_or_file_exists(char *name);
 int aquire_lock(text* filename);
 void release_lock(int fd);
 void get_lockfile(text* lockfile, char* username);

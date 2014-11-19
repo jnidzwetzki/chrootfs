@@ -1,6 +1,7 @@
 .PHONY: all clean install uninstall 
 
-CFLAGS := -O2 -Wall -g
+CFLAGS := -I../lib -O2 -Wall -g
+CFLAGS += -L../lib -lchrootfs
 
 all: chrootfsmng 
 

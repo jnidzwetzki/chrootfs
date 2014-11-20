@@ -398,17 +398,25 @@ bool umount_fuse_fs(char* username)
 	return result;
 }
 
-bool mount_fuse_fs(text* dest_dir, char* username)
+bool mount_fuse_fs(char* username)
 {
 	uid_t uid;
 	gid_t gid;
 	bool result;
+	text* dest_dir;
 
 	result = get_uid_and_gid_for_user(username, &uid, &gid);
 	gid = get_gid_from_file(FUSE_DEV);
 
-	if(result != false && gid != -1) {
+	dest_dir = text_new();
+	
+	if(dest_dir == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+		result = false;
+	} else if(result != false && gid != -1) {
 
+		get_mount_path(dest_dir, username);
+		
 		// Mount chrootfs
 		result = execute_command(dest_dir, get_fuse_mount_command, uid, gid);
 		if(result == false)
@@ -436,6 +444,7 @@ bool mount_fuse_fs(text* dest_dir, char* username)
 
 	}
 
+	text_free(dest_dir);
 	return result;
 }
 
@@ -465,7 +474,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 		umount_pending = dir_or_file_exists(umount_file->text); 
 		
 		if(mount_dir_exists == true && umount_pending == false)	
-			result = mount_fuse_fs(dest_dir, username);
+			result = mount_fuse_fs(username);
 
 		if(result == true) {
 			res = chroot(dest_dir->text);

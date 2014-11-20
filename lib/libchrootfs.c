@@ -191,6 +191,40 @@ void get_proc_mount_command(text* mount_command, text* dest_dir)
 	strncat(mount_command->text, "/proc", text_get_free_space(mount_command));
 }
 
+void get_dev_pts_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/dev/pts", text_get_free_space(umount_command));
+}
+
+void get_dev_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/dev", text_get_free_space(umount_command));
+}
+
+void get_sys_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/sys", text_get_free_space(umount_command));
+}
+
+void get_proc_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/proc", text_get_free_space(umount_command));
+}
+
+void get_fuse_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+}
+
 bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
 {
 	long buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
@@ -329,6 +363,37 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 	}
 
 	text_free(command);
+
+	return result;
+}
+
+bool umount_fuse_fs(char* username)
+{
+	text* dest_dir;
+	bool result;
+	size_t i;
+
+	readcommand commands[] = { get_dev_pts_umount_command, get_dev_umount_command, 
+				   get_sys_umount_command, get_proc_umount_command, 
+				   get_fuse_umount_command };
+
+	dest_dir = text_new();
+	result = true;
+
+	if(dest_dir == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+		result = false;
+	} else {
+		get_mount_path(dest_dir, username);
+		for(i = 0; i < sizeof(commands); i++) {
+			result = execute_command(dest_dir, commands[i], 0, 0);
+
+			if(result == false)
+				break;
+		}
+	}
+
+	text_free(dest_dir);
 
 	return result;
 }

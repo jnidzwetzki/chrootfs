@@ -123,12 +123,49 @@ void umount_filesystem(configuration *config)
 
 void enable_chrootfs(configuration *config)
 {
+	text *chroot_dir;
+	bool result;
+	uid_t uid;
+	gid_t gid;
 
+	chroot_dir = text_new(); 
+
+	if(chroot_dir == NULL) {
+		printf("Out of memory in line: %d\n", __LINE__);
+		return;
+	}
+
+	result = get_uid_and_gid_for_user(config->username, &uid, &gid);
+
+	if(result == false) {
+		printf("Unable to read uid and gid for user %s\n", config->username);
+	} else {
+		get_mount_path(chroot_dir, config->username);
+		mkdir(chroot_dir->text, 755);
+		chown(chroot_dir->text, uid, 0);
+	
+		printf("Enabled chrootfs for user %s\n", config->username);
+	
+		result = unset_umount_pending(config->username);
+
+		if(result == false)
+			printf("Unable to remove pending umount for user, chrootfs may be not active\n");
+	}
+
+	text_free(chroot_dir);
 }
 
 void disable_chrootfs(configuration *config)
 {
+	bool result;
 
+	result = set_umount_pending(config->username);
+
+	if(result == false) {
+		printf("Unable to active pending umount for user\n");
+	} else {
+		printf("Umount for user is now pending\n");
+	}
 }
 
 int main(int argc, char *argv[])

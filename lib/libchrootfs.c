@@ -458,6 +458,52 @@ bool mount_fuse_fs(char* username)
 	return result;
 }
 
+bool change_umount_pending(char *username, bool remove)
+{
+	text* umount_file;
+	FILE *file;
+	bool result;
+	int res;
+
+	result = true;
+
+	umount_file = text_new();
+
+	if(umount_file == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+	} else {
+		get_umount_pending_test_path(umount_file, username);
+	
+		if(remove == true) {
+			res = unlink(umount_file->text);
+			
+			if(res != 0)
+				result = false;
+		} else {
+			file = fopen(umount_file->text, "w");
+			
+			if(file == NULL)
+				result = false;
+
+			fclose(file);
+		}
+	}
+
+	text_free(umount_file);
+
+	return result;
+}
+
+bool set_umount_pending(char *username)
+{
+	return change_umount_pending(username, false);
+}
+
+bool unset_umount_pending(char *username)
+{
+	return change_umount_pending(username, true);
+}
+
 bool mount_chrootfs(text* dest_dir, char* username)
 {
 	bool result;

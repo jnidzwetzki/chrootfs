@@ -79,5 +79,8 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 bool mount_fuse_fs(char* username);
 bool mount_chrootfs(text* dest_dir, char* username);
 bool test_and_mount_chrootfs(char *username);
+bool change_umount_pending(char *username, bool remove);
+bool set_umount_pending(char *username);
+bool unset_umount_pending(char *username);
 
 #endif

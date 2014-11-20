@@ -283,7 +283,7 @@ bool set_uid_and_gid(uid_t uid, gid_t gid)
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgid in line %d", __LINE__);
 		return false;
 	}
-	
+
 	res = setegid(gid);
 	
 	if(res != 0) {
@@ -370,20 +370,27 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 bool umount_fuse_fs(char* username)
 {
 	text* dest_dir;
+	text* lockfile;
+
 	bool result;
 	size_t i;
+	int lockfd;
 
 	readcommand commands[] = { get_dev_pts_umount_command, get_dev_umount_command, 
 				   get_sys_umount_command, get_proc_umount_command, 
 				   get_fuse_umount_command };
 
 	dest_dir = text_new();
+	lockfile = text_new();
 	result = true;
 
-	if(dest_dir == NULL) {
+	if(dest_dir == NULL || lockfile == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
-	} else {
+	} else {	
+		get_lockfile(lockfile, username);
+		lockfd = aquire_lock(lockfile);
+
 		get_mount_path(dest_dir, username);
 		for(i = 0; i < sizeof(commands); i++) {
 			result = execute_command(dest_dir, commands[i], 0, 0);
@@ -391,9 +398,12 @@ bool umount_fuse_fs(char* username)
 			if(result == false)
 				break;
 		}
+
+		release_lock(lockfd);
 	}
 
 	text_free(dest_dir);
+	text_free(lockfile);
 
 	return result;
 }

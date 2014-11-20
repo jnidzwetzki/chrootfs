@@ -97,12 +97,28 @@ void parse_commandline_args(int argc, char *argv[], configuration *config)
 
 void mount_filesystem(configuration *config)
 {
+	bool res;
 
+	res = mount_fuse_fs(config->username);
+
+	if(res == false) {
+		printf("Unable to mount chrootfs for user %s\n", config->username);
+	} else {
+		printf("chrootfs for user %s is now mounted\n", config->username);
+	}
 }
 
 void umount_filesystem(configuration *config)
 {
+	bool res;
 
+	res = umount_fuse_fs(config->username);
+	
+	if(res == false) {
+		printf("Unable to umount chrootfs for user %s\n", config->username);
+	} else {
+		printf("chrootfs for user %s is now unmounted\n", config->username);
+	}
 }
 
 void enable_chrootfs(configuration *config)

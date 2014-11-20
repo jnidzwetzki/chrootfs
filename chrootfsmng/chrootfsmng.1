@@ -2,9 +2,22 @@
 .SH NAME
 chrootfsmng \- management untility for chrootfs
 .SH SYNOPSIS
-chrootfsmng [OPTIONS] username
+chrootfsmng [-m | -u | -e | -d | -h] username
 .SH DESCRIPTION
-chrootfsmng is a management untility for chrootfs. 
+chrootfsmng is a management untility for chrootfs. It allows you to enable or to disable the chrootfs for a given user. 
+.SS Options
+.IP \fB-h\fR
+Print a help message and exit.
+.IP \fB-m\fR
+Mount chrootfs for user.
+.IP \fB-u\fR
+Unmount chrootfs for user.
+.IP \fB-e\fR
+Enable chrootfs for user.
+.IP \fB-d\fR
+Disable chrootfs for user.
+.SH FILES
+.I /var/chrootfs
 .SH BUGS
 No known bugs.
 .SH AUTHOR

@@ -38,7 +38,7 @@ int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, const char **ar
 		return PAM_CHROOT_ERROR;
 	}
 
-	if(check_dir_exists(CHROOTFS_DIR) != true) {
+	if(dir_or_file_exists(CHROOTFS_DIR) != true) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to open chroot dir %s", CHROOTFS_DIR);
 		return PAM_CHROOT_ERROR;
 	}

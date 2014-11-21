@@ -395,7 +395,7 @@ bool umount_fuse_fs(char* username)
 		lockfd = aquire_lock(lockfile);
 
 		get_mount_path(dest_dir, username);
-		for(i = 0; i < sizeof(commands); i++) {
+		for(i = 0; i < sizeof(commands) / sizeof(commands[0]); i++) {
 			result = execute_command(dest_dir, commands[i], 0, 0);
 
 			if(result == false)

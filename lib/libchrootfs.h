@@ -65,13 +65,22 @@ void get_dev_mount_command(text* mount_command, text* dest_dir);
 void get_dev_pts_mount_command(text* mount_command, text* dest_dir);
 void get_sys_mount_command(text* mount_command, text* dest_dir);
 void get_proc_mount_command(text* mount_command, text* dest_dir);
+void get_dev_pts_umount_command(text* umount_command, text* dest_dir);
+void get_dev_umount_command(text* umount_command, text* dest_dir);
+void get_sys_umount_command(text* umount_command, text* dest_dir);
+void get_proc_umount_command(text* umount_command, text* dest_dir);
+void get_fuse_umount_command(text* umount_command, text* dest_dir);
+bool umount_fuse_fs(char* username);
 bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid);
 gid_t get_gid_from_file(const char* file);
 bool set_uid_and_gid(uid_t uid, gid_t gid);
 bool execute_as_user(text* command, uid_t uid, gid_t gid);
 bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t gid);
-bool mount_fuse_fs(text* dest_dir, char* username);
+bool mount_fuse_fs(char* username);
 bool mount_chrootfs(text* dest_dir, char* username);
 bool test_and_mount_chrootfs(char *username);
+bool change_umount_pending(char *username, bool remove);
+bool set_umount_pending(char *username);
+bool unset_umount_pending(char *username);
 
 #endif

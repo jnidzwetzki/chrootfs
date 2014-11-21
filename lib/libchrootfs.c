@@ -191,6 +191,40 @@ void get_proc_mount_command(text* mount_command, text* dest_dir)
 	strncat(mount_command->text, "/proc", text_get_free_space(mount_command));
 }
 
+void get_dev_pts_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/dev/pts", text_get_free_space(umount_command));
+}
+
+void get_dev_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/dev", text_get_free_space(umount_command));
+}
+
+void get_sys_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/sys", text_get_free_space(umount_command));
+}
+
+void get_proc_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+	strncat(umount_command->text, "/proc", text_get_free_space(umount_command));
+}
+
+void get_fuse_umount_command(text* umount_command, text* dest_dir)
+{
+	strncpy(umount_command->text, "umount ", text_get_free_space(umount_command));
+	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
+}
+
 bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
 {
 	long buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
@@ -249,7 +283,7 @@ bool set_uid_and_gid(uid_t uid, gid_t gid)
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgid in line %d", __LINE__);
 		return false;
 	}
-	
+
 	res = setegid(gid);
 	
 	if(res != 0) {
@@ -333,17 +367,66 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 	return result;
 }
 
-bool mount_fuse_fs(text* dest_dir, char* username)
+bool umount_fuse_fs(char* username)
+{
+	text* dest_dir;
+	text* lockfile;
+
+	bool result;
+	size_t i;
+	int lockfd;
+
+	readcommand commands[] = { get_dev_pts_umount_command, get_dev_umount_command, 
+				   get_sys_umount_command, get_proc_umount_command, 
+				   get_fuse_umount_command };
+
+	dest_dir = text_new();
+	lockfile = text_new();
+	result = true;
+
+	if(dest_dir == NULL || lockfile == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+		result = false;
+	} else {	
+		get_lockfile(lockfile, username);
+		lockfd = aquire_lock(lockfile);
+
+		get_mount_path(dest_dir, username);
+		for(i = 0; i < sizeof(commands); i++) {
+			result = execute_command(dest_dir, commands[i], 0, 0);
+
+			if(result == false)
+				break;
+		}
+
+		release_lock(lockfd);
+	}
+
+	text_free(dest_dir);
+	text_free(lockfile);
+
+	return result;
+}
+
+bool mount_fuse_fs(char* username)
 {
 	uid_t uid;
 	gid_t gid;
 	bool result;
+	text* dest_dir;
 
 	result = get_uid_and_gid_for_user(username, &uid, &gid);
 	gid = get_gid_from_file(FUSE_DEV);
 
-	if(result != false && gid != -1) {
+	dest_dir = text_new();
+	
+	if(dest_dir == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+		result = false;
+	} else if(result != false && gid != -1) {
 
+		get_mount_path(dest_dir, username);
+		
 		// Mount chrootfs
 		result = execute_command(dest_dir, get_fuse_mount_command, uid, gid);
 		if(result == false)
@@ -371,7 +454,54 @@ bool mount_fuse_fs(text* dest_dir, char* username)
 
 	}
 
+	text_free(dest_dir);
 	return result;
+}
+
+bool change_umount_pending(char *username, bool remove)
+{
+	text* umount_file;
+	FILE *file;
+	bool result;
+	int res;
+
+	result = true;
+
+	umount_file = text_new();
+
+	if(umount_file == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+	} else {
+		get_umount_pending_test_path(umount_file, username);
+	
+		if(remove == true) {
+			res = unlink(umount_file->text);
+			
+			if(res != 0)
+				result = false;
+		} else {
+			file = fopen(umount_file->text, "w");
+			
+			if(file == NULL)
+				result = false;
+
+			fclose(file);
+		}
+	}
+
+	text_free(umount_file);
+
+	return result;
+}
+
+bool set_umount_pending(char *username)
+{
+	return change_umount_pending(username, false);
+}
+
+bool unset_umount_pending(char *username)
+{
+	return change_umount_pending(username, true);
 }
 
 bool mount_chrootfs(text* dest_dir, char* username)
@@ -400,7 +530,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 		umount_pending = dir_or_file_exists(umount_file->text); 
 		
 		if(mount_dir_exists == true && umount_pending == false)	
-			result = mount_fuse_fs(dest_dir, username);
+			result = mount_fuse_fs(username);
 
 		if(result == true) {
 			res = chroot(dest_dir->text);

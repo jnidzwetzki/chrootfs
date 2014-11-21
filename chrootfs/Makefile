@@ -18,11 +18,10 @@ all: chrootfs
 	$(MAKE) -C tests 
 
 install: all
-	mkdir -p $(DESTDIR)/etc
-	mkdir -p $(DESTDIR)/usr/bin
-	cp chrootfs.conf $(DESTDIR)/etc
-	cp chrootfs $(DESTDIR)/usr/bin
-	chmod 755 $(DESTDIR)/usr/bin/chrootfs
+	install -d -m 0755 $(DESTDIR)/etc
+	install -d -m 0755 $(DESTDIR)/usr/bin
+	install -o root -g root -m 0644 chrootfs.conf $(DESTDIR)/etc/chrootfs.conf
+	install -o root -g root -m 0755 chrootfs $(DESTDIR)/usr/bin/chrootfs
 
 uninstall:
 	rm -f $(DESTDIR)/etc/chrootfs.conf

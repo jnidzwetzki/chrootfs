@@ -1,6 +1,7 @@
 .PHONY: all clean install uninstall 
 
-CFLAGS := -O2 -Wall -g
+CFLAGS := -I../lib -O2 -Wall -g
+CFLAGS += -L../lib -lchrootfs
 
 all: chrootfsmng 
 
@@ -11,7 +12,7 @@ clean:
 	rm -f chrootfsmng
 
 install: all 
-	cp chrootfsmng $(DESTDIR)/usr/bin 
+	install -o root -g root -m 0755 chrootfsmng $(DESTDIR)/usr/bin/chrootfsmng 
 
 uninstall:
 	rm -f $(DESTDIR)/usr/bin/libchrootfs.so

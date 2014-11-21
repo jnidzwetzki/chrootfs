@@ -504,7 +504,10 @@ bool set_umount_pending(char *username)
 
 bool unset_umount_pending(char *username)
 {
-	return change_umount_pending(username, true);
+	if(is_umount_pending(username))
+		return change_umount_pending(username, true);
+
+	return true;
 }
 
 bool is_fs_mounted(char* username)

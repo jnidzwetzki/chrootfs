@@ -9,7 +9,7 @@ all:
 	$(MAKE) -C chrootfsmng all
 
 install: all
-	$(MAKE) -C lib all
+	$(MAKE) -C lib install
 	$(MAKE) -C chrootfs install
 	$(MAKE) -C pam install
 	$(MAKE) -C chrootfsmng install

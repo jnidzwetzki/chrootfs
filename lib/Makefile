@@ -1,6 +1,6 @@
 .PHONY: all clean install uninstall 
 
-CFLAGS := -fPIC -DPIC -shared -rdynamic -Wall
+CFLAGS := -fPIC -DPIC -shared -rdynamic -Wall -g
 CFLAGS_STATIC := -fPIC -DPIC -Wall
 
 

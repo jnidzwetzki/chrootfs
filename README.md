@@ -79,7 +79,7 @@ drwxr-xr-x 3 root    root        4096 Jul  7  2006 tomcat-root
 test@tusnelda:~$
 ```
 
-With chrootfs:
+After enabling chrootfs for user `test` by running `chrootfsmng -e test`:
 ```
 $ ssh test@192.168.1.15
 test@tusnelda:~$ ls -ld /etc/squid

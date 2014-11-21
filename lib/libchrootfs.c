@@ -142,9 +142,11 @@ void get_mount_path(text* dest_dir, char* username)
 	strncat(dest_dir->text, username, text_get_free_space(dest_dir));
 }
 
-void get_fs_mounted_test_path(text* check_dir, text* dest_dir)
+void get_fs_mounted_test_path(text* check_dir, char* username)
 {
-	strncpy(check_dir->text, dest_dir->text, text_get_free_space(check_dir));
+	strncpy(check_dir->text, CHROOTFS_DIR, text_get_free_space(check_dir));
+	strncat(check_dir->text, "/", text_get_free_space(check_dir));
+	strncpy(check_dir->text, username, text_get_free_space(check_dir));
 	strncat(check_dir->text, "/bin", text_get_free_space(check_dir));
 }
 
@@ -524,7 +526,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
 	} else {
-		get_fs_mounted_test_path(check_dir, dest_dir);
+		get_fs_mounted_test_path(check_dir, username);
 		get_umount_pending_test_path(umount_file, username);
 
 		mount_dir_exists = dir_or_file_exists(check_dir->text);

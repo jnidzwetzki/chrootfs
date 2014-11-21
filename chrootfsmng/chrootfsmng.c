@@ -99,7 +99,7 @@ void mount_filesystem(configuration *config)
 {
 	bool res;
 
-	res = mount_fuse_fs(config->username);
+	res = test_and_mount_chrootfs(config->username);
 
 	if(res == false) {
 		printf("Unable to mount chrootfs for user %s\n", config->username);

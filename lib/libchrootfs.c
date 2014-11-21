@@ -146,7 +146,7 @@ void get_fs_mounted_test_path(text* check_dir, char* username)
 {
 	strncpy(check_dir->text, CHROOTFS_DIR, text_get_free_space(check_dir));
 	strncat(check_dir->text, "/", text_get_free_space(check_dir));
-	strncpy(check_dir->text, username, text_get_free_space(check_dir));
+	strncat(check_dir->text, username, text_get_free_space(check_dir));
 	strncat(check_dir->text, "/bin", text_get_free_space(check_dir));
 }
 
@@ -563,7 +563,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 	mount_dir_exists = is_fs_mounted(username);
 	umount_pending = is_umount_pending(username);
 		
-	if(mount_dir_exists == true && umount_pending == false)	
+	if(mount_dir_exists == false && umount_pending == false)	
 		result = mount_fuse_fs(username);
 
 	if(result == true) {

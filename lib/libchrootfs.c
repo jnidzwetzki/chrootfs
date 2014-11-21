@@ -507,45 +507,70 @@ bool unset_umount_pending(char *username)
 	return change_umount_pending(username, true);
 }
 
+bool is_fs_mounted(char* username)
+{
+	text* check_dir;
+	bool result;
+
+	check_dir = text_new();
+	
+	if(check_dir == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+		return false;
+	}
+
+	get_fs_mounted_test_path(check_dir, username);
+	result = dir_or_file_exists(check_dir->text);
+	
+	text_free(check_dir);
+
+	return result;
+}
+
+bool is_umount_pending(char* username)
+{
+	text* umount_file;
+	bool result;
+
+	umount_file = text_new();
+
+	if(umount_file == NULL) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
+		return false;
+	}
+		
+	get_umount_pending_test_path(umount_file, username);
+	result = dir_or_file_exists(umount_file->text); 
+	
+	text_free(umount_file);
+
+	return result;
+}
+
+
 bool mount_chrootfs(text* dest_dir, char* username)
 {
 	bool result;
 	bool mount_dir_exists;
 	bool umount_pending;
-
-	text* check_dir;
-	text* umount_file;
 	int res;
-	
-	check_dir = text_new();
-	umount_file = text_new();
 
 	result = true;
 	
-	if(check_dir == NULL || umount_file == NULL) {
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
-		result = false;
-	} else {
-		get_fs_mounted_test_path(check_dir, username);
-		get_umount_pending_test_path(umount_file, username);
-
-		mount_dir_exists = dir_or_file_exists(check_dir->text);
-		umount_pending = dir_or_file_exists(umount_file->text); 
+	mount_dir_exists = is_fs_mounted(username);
+	umount_pending = is_umount_pending(username);
 		
-		if(mount_dir_exists == true && umount_pending == false)	
-			result = mount_fuse_fs(username);
+	if(mount_dir_exists == true && umount_pending == false)	
+		result = mount_fuse_fs(username);
 
-		if(result == true) {
-			res = chroot(dest_dir->text);
-				
-			if(res != 0)
-				chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to chroot in line %d", __LINE__);
+	if(result == true) {
+		res = chroot(dest_dir->text);
+			
+		if(res != 0) {
+			chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to chroot in line %d", __LINE__);
+			result = false;
 		}
-
 	}
-
-	text_free(check_dir);
-	text_free(umount_file);
 
 	return result;
 }

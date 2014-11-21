@@ -82,5 +82,6 @@ bool test_and_mount_chrootfs(char *username);
 bool change_umount_pending(char *username, bool remove);
 bool set_umount_pending(char *username);
 bool unset_umount_pending(char *username);
-
+bool is_fs_mounted(char* username);
+bool is_umount_pending(char* username);
 #endif

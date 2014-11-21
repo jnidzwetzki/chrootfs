@@ -151,8 +151,9 @@ void get_is_mounted_test_path(text* check_dir, text* dest_dir)
 void get_umount_pending_test_path(text* check_dir, char* username)
 {
 	strncpy(check_dir->text, CHROOTFS_DIR, text_get_free_space(check_dir));
-	strncat(check_dir->text, "/.umount_", text_get_free_space(check_dir));
+	strncat(check_dir->text, "/.", text_get_free_space(check_dir));
 	strncat(check_dir->text, username, text_get_free_space(check_dir));
+	strncat(check_dir->text, ".umount", text_get_free_space(check_dir));
 }
 
 void get_fuse_mount_command(text* mount_command, text* dest_dir)

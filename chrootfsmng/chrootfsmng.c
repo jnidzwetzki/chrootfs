@@ -141,7 +141,7 @@ void enable_chrootfs(configuration *config)
 		printf("Unable to read uid and gid for user %s\n", config->username);
 	} else {
 		get_mount_path(chroot_dir, config->username);
-		mkdir(chroot_dir->text, 755);
+		mkdir(chroot_dir->text, 0755);
 		chown(chroot_dir->text, uid, 0);
 	
 		printf("Enabled chrootfs for user %s\n", config->username);

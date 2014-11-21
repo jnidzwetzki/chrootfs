@@ -86,8 +86,8 @@ void parse_commandline_args(int argc, char *argv[], configuration *config)
 	}
 
 	// Check for invalid flag combination
-	if(flags != FLAG_MOUNT || flags != FLAG_UMOUNT || 
-	   flags != FLAG_ENABLE || flags != FLAG_DISABLE) {
+	if(flags != FLAG_MOUNT && flags != FLAG_UMOUNT &&
+	   flags != FLAG_ENABLE && flags != FLAG_DISABLE) {
 		printf("Invalid combination of flags\n");
 		print_help_and_exit(argv[0]);
 	}

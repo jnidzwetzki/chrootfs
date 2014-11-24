@@ -127,7 +127,7 @@ void release_lock(int fd)
 	}
 }
 
-void get_lockfile(text* lockfile, char* username)
+void get_lockfile(text* lockfile, const char *username)
 {
 	strncpy(lockfile->text, CHROOTFS_DIR, text_get_free_space(lockfile));
 	strncat(lockfile->text, "/.", text_get_free_space(lockfile));
@@ -135,14 +135,14 @@ void get_lockfile(text* lockfile, char* username)
 	strncat(lockfile->text, ".lock", text_get_free_space(lockfile));
 }
 
-void get_mount_path(text* dest_dir, char* username)
+void get_mount_path(text* dest_dir, const char *username)
 {
 	strncpy(dest_dir->text, CHROOTFS_DIR, text_get_free_space(dest_dir));
 	strncat(dest_dir->text, "/", text_get_free_space(dest_dir));
 	strncat(dest_dir->text, username, text_get_free_space(dest_dir));
 }
 
-void get_fs_mounted_test_path(text* check_dir, char* username)
+void get_fs_mounted_test_path(text* check_dir, const char *username)
 {
 	strncpy(check_dir->text, CHROOTFS_DIR, text_get_free_space(check_dir));
 	strncat(check_dir->text, "/", text_get_free_space(check_dir));
@@ -150,7 +150,7 @@ void get_fs_mounted_test_path(text* check_dir, char* username)
 	strncat(check_dir->text, "/bin", text_get_free_space(check_dir));
 }
 
-void get_umount_pending_test_path(text* check_dir, char* username)
+void get_umount_pending_test_path(text* check_dir, const char *username)
 {
 	strncpy(check_dir->text, CHROOTFS_DIR, text_get_free_space(check_dir));
 	strncat(check_dir->text, "/.", text_get_free_space(check_dir));
@@ -228,7 +228,7 @@ void get_fuse_umount_command(text* umount_command, text* dest_dir)
 	strncat(umount_command->text, dest_dir->text, text_get_free_space(umount_command));
 }
 
-bool get_uid_and_gid_for_user(char* username, uid_t *uid, gid_t *gid)
+bool get_uid_and_gid_for_user(const char *username, uid_t *uid, gid_t *gid)
 {
 	long buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	struct passwd pwbuf, *pwbufp;
@@ -370,7 +370,7 @@ bool execute_command(text* dest_dir, readcommand readcommand, uid_t uid, gid_t g
 	return result;
 }
 
-bool umount_fuse_fs(char* username)
+bool umount_fuse_fs(const char *username)
 {
 	text* dest_dir;
 	text* lockfile;
@@ -411,7 +411,7 @@ bool umount_fuse_fs(char* username)
 	return result;
 }
 
-bool mount_fuse_fs(char* username)
+bool mount_fuse_fs(const char *username)
 {
 	uid_t uid;
 	gid_t gid;
@@ -461,7 +461,7 @@ bool mount_fuse_fs(char* username)
 	return result;
 }
 
-bool change_umount_pending(char *username, bool remove)
+bool change_umount_pending(const char *username, bool remove)
 {
 	text* umount_file;
 	FILE *file;
@@ -497,12 +497,12 @@ bool change_umount_pending(char *username, bool remove)
 	return result;
 }
 
-bool set_umount_pending(char *username)
+bool set_umount_pending(const char *username)
 {
 	return change_umount_pending(username, false);
 }
 
-bool unset_umount_pending(char *username)
+bool unset_umount_pending(const char *username)
 {
 	if(is_umount_pending(username))
 		return change_umount_pending(username, true);
@@ -510,7 +510,7 @@ bool unset_umount_pending(char *username)
 	return true;
 }
 
-bool is_fs_mounted(char* username)
+bool is_fs_mounted(const char *username)
 {
 	text* check_dir;
 	bool result;
@@ -530,7 +530,7 @@ bool is_fs_mounted(char* username)
 	return result;
 }
 
-bool is_umount_pending(char* username)
+bool is_umount_pending(const char *username)
 {
 	text* umount_file;
 	bool result;
@@ -551,7 +551,7 @@ bool is_umount_pending(char* username)
 }
 
 
-bool mount_chrootfs(text* dest_dir, char* username)
+bool mount_chrootfs(text* dest_dir, const char *username)
 {
 	bool result;
 	bool mount_dir_exists;
@@ -578,7 +578,7 @@ bool mount_chrootfs(text* dest_dir, char* username)
 	return result;
 }
 
-bool test_and_mount_chrootfs(char *username)
+bool test_and_mount_chrootfs(const char *username)
 {
 	bool result;
 	text* dest_dir;

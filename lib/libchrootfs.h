@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <grp.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/file.h>
@@ -73,9 +74,9 @@ void get_fuse_umount_command(text *umount_command, text *dest_dir);
 bool umount_fuse_fs(const char *username);
 bool get_uid_and_gid_for_user(const char *username, uid_t *uid, gid_t *gid);
 gid_t get_gid_from_file(const char* file);
-bool set_uid_and_gid(uid_t uid, gid_t gid);
-bool execute_as_user(text *command, uid_t uid, gid_t gid);
-bool execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t gid);
+bool set_uid_and_gid(uid_t uid, gid_t gid[], size_t gidc);
+bool execute_as_user(text *command, uid_t uid, gid_t gid[], size_t gidc);
+bool execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t gid[], size_t gidc);
 bool mount_fuse_fs(const char *username);
 bool mount_chrootfs(text *dest_dir, const char *username);
 bool test_and_mount_chrootfs(const char *username);

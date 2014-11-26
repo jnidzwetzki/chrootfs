@@ -276,23 +276,31 @@ gid_t get_gid_from_file(const char* file)
 	return attribute.st_gid;
 }
 
-bool set_uid_and_gid(uid_t uid, gid_t gid)
+bool set_uid_and_gid(uid_t uid, gid_t gid[], size_t gidc)
 {
 	int res;
 	
-	res = setgid(gid);
+	res = setgid(gid[0]);
 
 	if(res != 0) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgid in line %d", __LINE__);
 		return false;
 	}
 
-	res = setegid(gid);
+	res = setegid(gid[0]);
 	
 	if(res != 0) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setegid in line %d", __LINE__);
 		return false;
 	}
+
+	res = setgroups(gidc, gid);
+	
+	if(res != 0) {
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to execute setgroups in line %d", __LINE__);
+		return false;
+	}
+
 	res = setuid(uid);
 	
 	if(res != 0) {
@@ -310,7 +318,7 @@ bool set_uid_and_gid(uid_t uid, gid_t gid)
 	return true;
 }
 
-bool execute_as_user(text *command, uid_t uid, gid_t gid)
+bool execute_as_user(text *command, uid_t uid, gid_t gid[], size_t gidc)
 {
 	bool result;
 	pid_t pid;
@@ -331,13 +339,13 @@ bool execute_as_user(text *command, uid_t uid, gid_t gid)
 	} else {
 		// Child
 		
-		if(uid != 0 || gid != 0)
-			result = set_uid_and_gid(uid, gid);
+		if(uid != 0 || gid[0] != 0)
+			result = set_uid_and_gid(uid, gid, gidc);
 		
 		if(result == false)
 			return false;
 
-		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", command->text, uid, gid);
+		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", command->text, uid, gid[0]);
 		child_result = __WEXITSTATUS(system(command->text));
 		
 		if(child_result != 0)
@@ -349,7 +357,7 @@ bool execute_as_user(text *command, uid_t uid, gid_t gid)
 	return result;
 }
 
-bool execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t gid)
+bool execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t gid[], size_t gidc)
 {
 	bool result;
 	text *command;
@@ -362,7 +370,7 @@ bool execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t g
 		result = false;
 	} else {
 		readcommand(command, dest_dir);
-		result = execute_as_user(command, uid, gid);
+		result = execute_as_user(command, uid, gid, gidc);
 	}
 
 	text_free(command);
@@ -378,10 +386,16 @@ bool umount_fuse_fs(const char *username)
 	bool result;
 	size_t i;
 	int lockfd;
+	uid_t uid;
+	gid_t gids[2];
 
 	readcommand commands[] = { get_dev_pts_umount_command, get_dev_umount_command, 
 				   get_sys_umount_command, get_proc_umount_command, 
 				   get_fuse_umount_command };
+
+	// Execute commands as user and gruop root 
+	uid = 0;
+	gids[0] = 0;
 
 	dest_dir = text_new();
 	lockfile = text_new();
@@ -396,7 +410,7 @@ bool umount_fuse_fs(const char *username)
 
 		get_mount_path(dest_dir, username);
 		for(i = 0; i < sizeof(commands) / sizeof(commands[0]); i++) {
-			result = execute_command(dest_dir, commands[i], 0, 0);
+			result = execute_command(dest_dir, commands[i], uid, gids, sizeof(gids));
 
 			if(result == false)
 				break;
@@ -414,44 +428,51 @@ bool umount_fuse_fs(const char *username)
 bool mount_fuse_fs(const char *username)
 {
 	uid_t uid;
-	gid_t gid;
+	gid_t gid[2];
+
 	bool result;
 	text *dest_dir;
 
-	result = get_uid_and_gid_for_user(username, &uid, &gid);
-	gid = get_gid_from_file(FUSE_DEV);
+	// Get UID and primary group ID for user
+	result = get_uid_and_gid_for_user(username, &uid, &gid[0]);
+
+	// Get FUSE group ID
+	gid[1] = get_gid_from_file(FUSE_DEV);
 
 	dest_dir = text_new();
 	
 	if(dest_dir == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
 		result = false;
-	} else if(result != false && gid != -1) {
+	} else if(result != false && gid[0] != -1 && gid[1] != -1) {
 
 		get_mount_path(dest_dir, username);
 		
 		// Mount chrootfs
-		result = execute_command(dest_dir, get_fuse_mount_command, uid, gid);
+		result = execute_command(dest_dir, get_fuse_mount_command, uid, gid, sizeof(gid));
 		if(result == false)
 			return false;
 
+		// Change primary group id to root (0)
+		gid[0] = 0;
+
 		// Mount /dev
-		result = execute_command(dest_dir, get_dev_mount_command, 0, 0);
+		result = execute_command(dest_dir, get_dev_mount_command, 0, gid, sizeof(gid));
 		if(result == false)
 			return false;
 
 		// Mount /dev/pts
-		result = execute_command(dest_dir, get_dev_pts_mount_command, 0, 0);
+		result = execute_command(dest_dir, get_dev_pts_mount_command, 0, gid, sizeof(gid));
 		if(result == false)
 			return false;
 
 		// Mount /sys
-		result = execute_command(dest_dir, get_sys_mount_command, 0, 0);
+		result = execute_command(dest_dir, get_sys_mount_command, 0, gid, sizeof(gid));
 		if(result == false)
 			return false;
 
 		// Mount /proc
-		result = execute_command(dest_dir, get_proc_mount_command, 0, 0);
+		result = execute_command(dest_dir, get_proc_mount_command, 0, gid, sizeof(gid));
 		if(result == false)
 			return false;
 

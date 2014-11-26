@@ -379,6 +379,18 @@ static int chrootfs_mknod(const char *path, mode_t mode, dev_t dev)
 	return 0;
 }
 
+static int chrootfs_utimens(const char *path, const struct timespec ts[2])
+{
+	int res;
+
+	res = utimensat(0, path, ts, AT_SYMLINK_NOFOLLOW);
+	
+	if (res == -1)
+		return -errno;
+
+	return 0;
+}
+
 #ifdef HAVE_SETXATTR
 static int chrootfs_getxattr(const char *path, const char *name, 
        char *value, size_t size) 
@@ -491,6 +503,7 @@ static struct fuse_operations chrootfs_oper = {
 	.write       = chrootfs_write,
 	.statfs      = chrootfs_statfs,
         .mknod       = chrootfs_mknod,
+	.utimens     = chrootfs_utimens,
 
 #ifdef HAVE_SETXATTR
         .getxattr    = chrootfs_getxattr,

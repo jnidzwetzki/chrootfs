@@ -318,19 +318,17 @@ bool set_uid_and_gid(uid_t uid, gid_t gid[], size_t gidc)
 	return true;
 }
 
-bool execute_as_user(text *command, uid_t uid, gid_t gid[], size_t gidc)
+int execute_as_user(text *command, uid_t uid, gid_t gid[], size_t gidc)
 {
 	bool result;
 	pid_t pid;
 	int child_result;
 
-	result = true;
-
 	pid = fork();
 
 	if(pid == -1) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to fork in line %d", __LINE__);
-		return false;
+		return -1;
 	}
 
 	if(pid != 0) {
@@ -338,12 +336,11 @@ bool execute_as_user(text *command, uid_t uid, gid_t gid[], size_t gidc)
 		waitpid(pid, &child_result, 0);	
 	} else {
 		// Child
-		
 		if(uid != 0 || gid[0] != 0)
 			result = set_uid_and_gid(uid, gid, gidc);
 		
 		if(result == false)
-			return false;
+			exit(-1);
 
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: executing: %s (uid %d gid %d)", command->text, uid, gid[0]);
 		child_result = __WEXITSTATUS(system(command->text));
@@ -354,20 +351,19 @@ bool execute_as_user(text *command, uid_t uid, gid_t gid[], size_t gidc)
 		exit(child_result);
 	}
 
-	return result;
+	return child_result;
 }
 
-bool execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t gid[], size_t gidc)
+int execute_command(text *dest_dir, readcommand readcommand, uid_t uid, gid_t gid[], size_t gidc)
 {
-	bool result;
+	int result;
 	text *command;
 	
 	command = text_new();
-	result = true;
 
 	if(command == NULL) {
 		chrootfs_pam_log(LOG_ERR, "pam_chrootfs: unable to allocate memory in line %d", __LINE__);
-		result = false;
+		result = -1;
 	} else {
 		readcommand(command, dest_dir);
 		result = execute_as_user(command, uid, gid, gidc);
@@ -384,6 +380,7 @@ bool umount_fuse_fs(const char *username)
 	text *lockfile;
 
 	bool result;
+	int command_result;
 	size_t i;
 	int lockfd;
 	uid_t uid;
@@ -410,10 +407,12 @@ bool umount_fuse_fs(const char *username)
 
 		get_mount_path(dest_dir, username);
 		for(i = 0; i < sizeof(commands) / sizeof(commands[0]); i++) {
-			result = execute_command(dest_dir, commands[i], uid, gids, sizeof(gids));
+			command_result = execute_command(dest_dir, commands[i], uid, gids, sizeof(gids));
 
-			if(result == false)
+			if(command_result != 0) {
+				result = false;
 				break;
+			}
 		}
 
 		release_lock(lockfd);

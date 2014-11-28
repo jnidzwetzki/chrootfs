@@ -430,6 +430,7 @@ bool mount_fuse_fs(const char *username)
 	gid_t gid[2];
 
 	bool result;
+	int command_result;
 	text *dest_dir;
 
 	// Get UID and primary group ID for user
@@ -448,8 +449,9 @@ bool mount_fuse_fs(const char *username)
 		get_mount_path(dest_dir, username);
 		
 		// Mount chrootfs
-		result = execute_command(dest_dir, get_fuse_mount_command, uid, gid, sizeof(gid));
-		if(result == false)
+		command_result = execute_command(dest_dir, get_fuse_mount_command, uid, gid, sizeof(gid));
+		
+		if(command_result != 0)
 			return false;
 
 		// Change primary group id to root (0)
